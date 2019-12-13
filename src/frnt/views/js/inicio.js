@@ -282,23 +282,16 @@ ipcRenderer.on('getAllCampanasResult', async(event, datos) => {
     datos.in.forEach(function(modulo, index) {
         $("#allcampanas").append('<li class="list-group-item d-flex col-12 justify-content-between" id="IndicadoresCol">' +
             '<div class="float-left" style="text-align: initial; color:#fff;">' + modulo.DSC + '</div>' +
-            '<button class="btn" id="playcampana" onclick="lnzRonda(' + modulo.ID + ')" style="height: fit-content; width: fit-content;">' +
-            '<i id="play' + index + '" class="icon-play3" style="color: #269EE3; font-size: 15px;"></i></button></li>');
+            '<button class="btn" id="playcampana" onclick="lnzRonda(' + modulo.ID + ', playibd' + index + ')" style="height: fit-content; width: fit-content;">' +
+            '<i id="playibd' + index + '" class="icon-play3" style="color: #269EE3; font-size: 15px;"></i></button></li>');
     });
 
     datos.out.forEach(function(modulo, index) {
         $("#allcampanas").append('<li class="list-group-item d-flex col-12 justify-content-between" id="IndicadoresCol">' +
             '<div class="float-left" style="text-align: initial; color:#fff;">' + modulo.DSC + '</div>' +
-            '<button class="btn" id="playcampana" onclick="lnzRonda(' + modulo.ID + ')" style="height: fit-content; width: fit-content;">' +
-            '<i id="play' + index + '" class="icon-play3" style="color: #269EE3; font-size: 15px;"></i></button></li>');
+            '<button class="btn" id="playcampana" onclick="lnzRonda(' + modulo.ID + ', playobd' + index + ')" style="height: fit-content; width: fit-content;">' +
+            '<i id="playobd' + index + '" class="icon-play3" style="color: #269EE3; font-size: 15px;"></i></button></li>');
     });
-    /* $("#campanaComboid").html("");
-    datos.in.forEach(modulo => {
-        $("#campanaComboid").append("<option value='" + modulo.ID + "'>" + modulo.DSC + "</option>")
-    });
-    datos.out.forEach(modulo => {
-        $("#campanaComboid").append("<option value='" + modulo.ID + "'>" + modulo.DSC + "</option>")
-    }); */
 });
 
 //llena combo de estatus
@@ -863,21 +856,34 @@ $(document).ready(function() {
     });
 });
 
-function lnzRonda(campana) {
+function lnzRonda(campana, idelement) {
     cronoval = 1;
     bandera = 0;
     numeroRonda = "01";
     arrancar_llamadas = "SI"
-    cronometroi = setInterval(cronometro, 10);
+    var row = idelement.parentNode.parentNode;
+    row.parentNode.removeChild(row);
+    row.childNodes[1].setAttribute("onClick", "detenerRonda(" + campana + ", " + idelement.id + ")");
+    row.childNodes[1].childNodes[0].className = "icon-stop2";
+    row.childNodes[1].childNodes[0].style = "color: red; font-size: 15px;";
+    $("#campanasactivas").append(row);
+    /* cronometroi = setInterval(cronometro, 10); */
+    /* alert(campana, arrancar_llamadas, numeroRonda, supervisor_firma); */
     //ipcRenderer.send("lnzaRondaCampana", campana, arrancar_llamadas, numeroRonda, supervisor_firma);
     //ipcRenderer.send('consultarAgente', campana, arrancar_llamadas, numeroRonda) //consulta los agentes para lanzar las llamadas en rondas de llamada
 }
 
-function detenerRonda(campana) {
+function detenerRonda(campana, idelement) {
     cronoval = 1;
     bandera = 1;
     numeroRonda = "01";
     arrancar_llamadas = "NO"
+    var row = idelement.parentNode.parentNode;
+    row.parentNode.removeChild(row);
+    row.childNodes[1].setAttribute("onClick", "lnzRonda(" + campana + ", " + idelement.id + ")");
+    row.childNodes[1].childNodes[0].className = "icon-play3";
+    row.childNodes[1].childNodes[0].style = "color: #269EE3; font-size: 15px;";
+    $("#allcampanas").append(row);
     //ipcRenderer.send("lnzaRondaCampana", campana, arrancar_llamadas, numeroRonda, supervisor_firma);
     //ipcRenderer.send('consultarAgente', campana, arrancar_llamadas, numeroRonda) //consulta los agentes para lanzar las llamadas en rondas de llamada
 }
@@ -928,7 +934,7 @@ function cronometro() {
         }
         if (cronoval == 1) {
             document.getElementById("lblRonda1").innerHTML = "Corriendo TIEMPO" + " " + minutos + ":" + segundos;
-        } 
+        }
     } else {
         /*document.getElementById("lblcrono").innerHTML="";
         document.getElementById("lblcrono2").innerHTML="";
