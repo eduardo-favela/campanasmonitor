@@ -276,15 +276,21 @@ ipcRenderer.on('getArbolResult', async(event, datos) => {
 //llena combo de campañas
 ipcRenderer.on('getAllCampanasResult', async(event, datos) => {
     console.log(datos);
-
+    var i = 0;
     $("#allcampanas").html("");
-    datos.in.forEach(modulo => {
+
+    datos.in.forEach(function(modulo, index) {
         $("#allcampanas").append('<li class="list-group-item d-flex col-12 justify-content-between" id="IndicadoresCol">' +
-            '<div class="float-left" style="text-align: initial; color:#fff;">' + modulo.DSC + '</div></li>');
+            '<div class="float-left" style="text-align: initial; color:#fff;">' + modulo.DSC + '</div>' +
+            '<button class="btn" id="playcampana" onclick="lnzRonda(' + modulo.ID + ')" style="height: fit-content; width: fit-content;">' +
+            '<i id="play' + index + '" class="icon-play3" style="color: #269EE3; font-size: 15px;"></i></button></li>');
     });
-    datos.out.forEach(modulo => {
+
+    datos.out.forEach(function(modulo, index) {
         $("#allcampanas").append('<li class="list-group-item d-flex col-12 justify-content-between" id="IndicadoresCol">' +
-            '<div class="float-left" style="text-align: initial; color:#fff;">' + modulo.DSC + '</div></li>');
+            '<div class="float-left" style="text-align: initial; color:#fff;">' + modulo.DSC + '</div>' +
+            '<button class="btn" id="playcampana" onclick="lnzRonda(' + modulo.ID + ')" style="height: fit-content; width: fit-content;">' +
+            '<i id="play' + index + '" class="icon-play3" style="color: #269EE3; font-size: 15px;"></i></button></li>');
     });
     /* $("#campanaComboid").html("");
     datos.in.forEach(modulo => {
