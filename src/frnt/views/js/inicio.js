@@ -873,110 +873,24 @@ $(document).ready(function() {
     });
 });
 
-function lnzRonda_1() {
+function lnzRonda(campana) {
     cronoval = 1;
-    var campana = $('#campanaComboid').val();
-    var supervisor = $('#supervisorComboid').val();
-    if (campana == '') {
-        mostrarMensaje('', 'Selecione una campaña')
-    } else {
-        if (arrancar_llamadas == "NO") {
-            bandera = 0;
-            numeroRonda = "01";
-            document.getElementById("play1").className = "icon-stop2";
-            document.getElementById("play1").style = "color: red; font-size: 15px;";
-            var play2 = document.getElementById("ronda2");
-            play2.disabled = true;
-            var play3 = document.getElementById("ronda3");
-            play3.disabled = true;
-            //$("#lblRonda1").text("Corriendo ");
-            arrancar_llamadas = "SI"
-            cronometroi = setInterval(cronometro, 10);
-        } else {
-            bandera = 1;
-            numeroRonda = "01";
-            document.getElementById("play1").className = "icon-play3";
-            document.getElementById("play1").style = "color: #565656; font-size: 15px;";
-            var play2 = document.getElementById("ronda2");
-            play2.disabled = false;
-            var play3 = document.getElementById("ronda3");
-            play3.disabled = false;
-            $("#lblRonda1").text("Terminada");
-            arrancar_llamadas = "NO"
-        }
-        ipcRenderer.send("lnzaRondaCampana", campana, arrancar_llamadas, numeroRonda, supervisor_firma);
-    }
+    bandera = 0;
+    numeroRonda = "01";
+    arrancar_llamadas = "SI"
+    cronometroi = setInterval(cronometro, 10);
+    alert(campana, arrancar_llamadas, numeroRonda, supervisor_firma);
+    //ipcRenderer.send("lnzaRondaCampana", campana, arrancar_llamadas, numeroRonda, supervisor_firma);
+    //ipcRenderer.send('consultarAgente', campana, arrancar_llamadas, numeroRonda) //consulta los agentes para lanzar las llamadas en rondas de llamada
 }
 
-function lnzRonda_2() {
-    cronoval = 2;
-    var campana = $('#campanaComboid').val();
-    var supervisor = $('#supervisorComboid').val();
-    if (campana == '') {
-        mostrarMensaje('', 'Selecione una campaña')
-    } else {
-        if (arrancar_llamadas == "NO") {
-            bandera = 0;
-            numeroRonda = "02";
-            document.getElementById("play2").className = "icon-stop2";
-            document.getElementById("play2").style = "color: red; font-size: 15px;";
-            var play2 = document.getElementById("ronda1");
-            play2.disabled = true;
-            var play3 = document.getElementById("ronda3");
-            play3.disabled = true;
-            //$("#lblRonda2").text("Corriendo");
-            arrancar_llamadas = "SI"
-            clearInterval(cronometroi);
-            cronometroi = setInterval(cronometro, 10);
-        } else {
-            bandera = 1;
-            numeroRonda = "02";
-            document.getElementById("play2").className = "icon-play3";
-            document.getElementById("play2").style = "color: #565656; font-size: 15px;";
-            var play2 = document.getElementById("ronda1");
-            play2.disabled = false;
-            var play3 = document.getElementById("ronda3");
-            play3.disabled = false;
-            $("#lblRonda2").text("Terminada");
-            arrancar_llamadas = "NO"
-        }
-        ipcRenderer.send("lnzaRondaCampana", campana, arrancar_llamadas, numeroRonda, supervisor_firma);
-    }
-}
-
-function lnzRonda_3() {
-    cronoval = 3;
-    var campana = $('#campanaComboid').val();
-    if (campana == '') {
-        mostrarMensaje('', "Seleccione una campaña")
-    } else {
-        if (arrancar_llamadas == "NO") {
-            bandera = 0;
-            numeroRonda = "03";
-            document.getElementById("play3").className = "icon-stop2";
-            document.getElementById("play3").style = "color: red; font-size: 15px;";
-            var play2 = document.getElementById("ronda2");
-            play2.disabled = true;
-            var play3 = document.getElementById("ronda1");
-            play3.disabled = true;
-            //$("#lblRonda3").text("Corriendo");
-            arrancar_llamadas = "SI"
-            clearInterval(cronometroi);
-            cronometroi = setInterval(cronometro, 10);
-        } else {
-            bandera = 1;
-            numeroRonda = "03";
-            document.getElementById("play3").className = "icon-play3";
-            document.getElementById("play3").style = "color: #565656; font-size: 15px;";
-            var play2 = document.getElementById("ronda2");
-            play2.disabled = false;
-            var play3 = document.getElementById("ronda1");
-            play3.disabled = false;
-            $("#lblRonda3").text("Terminada")
-            arrancar_llamadas = "NO"
-        }
-        ipcRenderer.send("lnzaRondaCampana", campana, arrancar_llamadas, numeroRonda, supervisor_firma);
-    }
+function detenerRonda(campana) {
+    cronoval = 1;
+    bandera = 1;
+    numeroRonda = "01";
+    arrancar_llamadas = "NO"
+    //ipcRenderer.send("lnzaRondaCampana", campana, arrancar_llamadas, numeroRonda, supervisor_firma);
+    //ipcRenderer.send('consultarAgente', campana, arrancar_llamadas, numeroRonda) //consulta los agentes para lanzar las llamadas en rondas de llamada
 }
 
 function cronometro() {
@@ -1025,11 +939,7 @@ function cronometro() {
         }
         if (cronoval == 1) {
             document.getElementById("lblRonda1").innerHTML = "Corriendo TIEMPO" + " " + minutos + ":" + segundos;
-        } else if (cronoval == 2) {
-            document.getElementById("lblRonda2").innerHTML = "Corriendo TIEMPO" + " " + minutos + ":" + segundos;
-        } else if (cronoval == 3) {
-            document.getElementById("lblRonda3").innerHTML = "Corriendo TIEMPO" + " " + minutos + ":" + segundos;
-        }
+        } 
     } else {
         /*document.getElementById("lblcrono").innerHTML="";
         document.getElementById("lblcrono2").innerHTML="";
