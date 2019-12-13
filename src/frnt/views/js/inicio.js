@@ -485,16 +485,6 @@ function dibujarBtns(nodoSeleccionada) {
 
 }
 
-function cerrarVentana() {
-
-    if ($("#divOpen").hasClass("d-flex")) {
-        $("#divOpen").removeClass("d-flex")
-    }
-    $("#divOpen").hide();
-    $("#webview").remove();
-    $("#divMonitor").show();
-}
-
 function verAplicacion(nodo) {
     abrirVentana()
     $("#divOpen").html(
@@ -873,7 +863,6 @@ function lnzRonda(campana) {
     numeroRonda = "01";
     arrancar_llamadas = "SI"
     cronometroi = setInterval(cronometro, 10);
-    alert(campana, arrancar_llamadas, numeroRonda, supervisor_firma);
     //ipcRenderer.send("lnzaRondaCampana", campana, arrancar_llamadas, numeroRonda, supervisor_firma);
     //ipcRenderer.send('consultarAgente', campana, arrancar_llamadas, numeroRonda) //consulta los agentes para lanzar las llamadas en rondas de llamada
 }
