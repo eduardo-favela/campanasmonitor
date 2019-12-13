@@ -279,18 +279,13 @@ ipcRenderer.on('getAllCampanasResult', async(event, datos) => {
     var i = 0;
     $("#allcampanas").html("");
 
-    datos.in.forEach(function(modulo, index) {
-        $("#allcampanas").append('<li class="list-group-item d-flex col-12 justify-content-between" id="IndicadoresCol">' +
-            '<div class="float-left" style="text-align: initial; color:#fff;">' + modulo.DSC + '</div>' +
-            '<button class="btn" id="playcampana" onclick="lnzRonda(' + modulo.ID + ', playibd' + index + ')" style="height: fit-content; width: fit-content;">' +
-            '<i id="playibd' + index + '" class="icon-play3" style="color: #269EE3; font-size: 15px;"></i></button></li>');
-    });
-
     datos.out.forEach(function(modulo, index) {
         $("#allcampanas").append('<li class="list-group-item d-flex col-12 justify-content-between" id="IndicadoresCol">' +
-            '<div class="float-left" style="text-align: initial; color:#fff;">' + modulo.DSC + '</div>' +
-            '<button class="btn" id="playcampana" onclick="lnzRonda(' + modulo.ID + ', playobd' + index + ')" style="height: fit-content; width: fit-content;">' +
-            '<i id="playobd' + index + '" class="icon-play3" style="color: #269EE3; font-size: 15px;"></i></button></li>');
+            '<div class="float-left" style="text-align: initial; color:#fff;">' + modulo.DSC + '<br>' +
+            '<label>Universo: ' + modulo.UNI + '</label></div>' +
+            '<button class="btn float-right" id="playcampana" onclick="lnzRonda(' + modulo.ID + ', playibd' + index + ')" style="height: fit-content; width: fit-content;">' +
+            '<i id="playibd' + index + '" class="icon-play3" style="color: #269EE3; font-size: 15px;"></i></button>' +
+            '</li>');
     });
 });
 
@@ -854,6 +849,14 @@ $(document).ready(function() {
         $(this).addClass('selected').siblings().removeClass('selected');
         var value = $(this).find('td:first').html();
     });
+
+    /* if (!$.trim($('#campanasactivas').html()).length) {
+        $('#campanasactivas').append('<li class="list-group-item d-flex col-12 justify-content-between" id="IndicadoresCol">' +
+            '<div style="text-align: initial; color:#fff;">' +
+            '<label>No hay campañas activas</label>' +
+            '</div>' +
+            '</li>')
+    } */
 });
 
 function lnzRonda(campana, idelement) {
@@ -869,8 +872,8 @@ function lnzRonda(campana, idelement) {
     $("#campanasactivas").append(row);
     /* cronometroi = setInterval(cronometro, 10); */
     /* alert(campana, arrancar_llamadas, numeroRonda, supervisor_firma); */
-    //ipcRenderer.send("lnzaRondaCampana", campana, arrancar_llamadas, numeroRonda, supervisor_firma);
-    //ipcRenderer.send('consultarAgente', campana, arrancar_llamadas, numeroRonda) //consulta los agentes para lanzar las llamadas en rondas de llamada
+    ipcRenderer.send("lnzaRondaCampana", campana, arrancar_llamadas, numeroRonda, supervisor_firma);
+    ipcRenderer.send('consultarAgente', campana, arrancar_llamadas, numeroRonda) //consulta los agentes para lanzar las llamadas en rondas de llamada
 }
 
 function detenerRonda(campana, idelement) {
@@ -884,8 +887,8 @@ function detenerRonda(campana, idelement) {
     row.childNodes[1].childNodes[0].className = "icon-play3";
     row.childNodes[1].childNodes[0].style = "color: #269EE3; font-size: 15px;";
     $("#allcampanas").append(row);
-    //ipcRenderer.send("lnzaRondaCampana", campana, arrancar_llamadas, numeroRonda, supervisor_firma);
-    //ipcRenderer.send('consultarAgente', campana, arrancar_llamadas, numeroRonda) //consulta los agentes para lanzar las llamadas en rondas de llamada
+    ipcRenderer.send("lnzaRondaCampana", campana, arrancar_llamadas, numeroRonda, supervisor_firma);
+    ipcRenderer.send('consultarAgente', campana, arrancar_llamadas, numeroRonda) //consulta los agentes para lanzar las llamadas en rondas de llamada
 }
 
 function cronometro() {

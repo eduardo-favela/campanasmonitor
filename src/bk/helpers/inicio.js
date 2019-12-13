@@ -16,10 +16,8 @@ module.exports.consultarAgentes = async(campana, cola, ID, sts, stsres) => {
     return agentes;
 }
 module.exports.getAllCampanas = async(datos) => {
-    const allCampanas = await pool.query(querys.getAllCampanas, []);
     const allCampanasOut = await pool3.query(querys.getAllCampanasOut, []);
     var campanas = {};
-    campanas.in = allCampanas;
     campanas.out = allCampanasOut;
     return campanas;
 }
