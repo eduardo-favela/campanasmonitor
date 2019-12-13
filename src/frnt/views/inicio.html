@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Monitoreo - Spartacus</title>
+    <link rel="stylesheet" href="../../../node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/styleResp.css">
+    <link rel="stylesheet" href="css/stylefonts.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.20/r-2.2.3/datatables.min.css" />
+</head>
+
+<body class="text-center bg-secondary position-absolute h-100 col-12 px-0">
+
+    <div class="container-fluid px-0">
+
+        <nav class="navbar navbar-dark bg-dark">
+            <div class="d-flex ">
+                <div class="dropdown">
+                    <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span class="icon-user"></span>
+                    </a>
+                    <div class="dropdown-menu  pb-0" aria-labelledby="dropdownMenuLink">
+                        <a onclick="cerrarSesion()" class="dropdown-item text-danger pb-2" href="#"><span class="icon-switch"></span> Cerrar sesión</a>
+                    </div>
+                </div>
+                <button onclick="modulosToggle()" type="button" class="btn btn-secondary float-rigth mx-1 ml-2"><span class="icon-menu"></span></button>
+                <button onclick="cerrarVentana()" type="button" class="btn btn-danger float-rigth mx-1"><span class="icon-home"></span></button>
+            </div>
+            <div class="float-rigth text-white">
+                <div id="circulo_estatus" class="circulo_estatus float-left mr-3"></div>
+                <div class="float-left" id="usuario">Usuario</div>
+                <div class="col" id="usuario_">Usuario</div>
+            </div>
+            <img src="img/logoTipo.png" alt="" style="width: 275px;">
+        </nav>
+    </div>
+    <div class="position-relative d-flex" style="height: calc(100% - 72px); width: 100%;">
+        <div id="modulosCont" class="col-3 float-left bg-secondary h-100" style="overflow-y: scroll; display: none;">
+            <div class="input-group my-3">
+                <div class="input-group-prepend">
+                    <label style="font-size: smaller;" class="input-group-text" for="comboPerfil">Perfil</label>
+                </div>
+                <select onchange="cambioPerfil()" style="font-size: smaller;" class="custom-select" id="comboPerfil"></select>
+            </div>
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <label style="font-size: smaller;" class="input-group-text" for="comboPerfil">Modulos</label>
+                </div>
+                <select onchange="cambioModulo()" style="font-size: smaller;" class="custom-select" id="comboModulos"></select>
+            </div>
+            <div class="accordion" id="accordionModulos">
+            </div>
+        </div>
+        <div class="col d-none  float-left bg-light h-100 px-0 position-relative" id="divOpen">
+        </div>
+        <div class="col float-left  h-100 px-0 position-relative" id="divMonitor">
+            <!-- <div class="card mx-0" style="padding-top: 15px;">
+                <div class="card-container">
+                    <div class="row mx-0" id="monitorForm_">
+
+                    </div>
+                </div>
+            </div> -->
+            <div class="alert float-rigth" id="alert_principal">
+            </div>
+            <!--Indicador 2-->
+            <div class="col-md-3 offset-2 float-left mt-3 table-responsive" id="indicador1" style="background: rgb(38,155,222);
+                background: linear-gradient(180deg, rgba(38,155,222,1) 0%, rgba(51,51,51,1) 100%); height: 100%; width: 100%; height: 80%; top:-4px;">
+                <br>
+                <img src="img/imgTelefono.png" style="float: left; margin-left: 6%; ">
+                <h5 style="color: #fff; font-weight: 350;">INBOUND</h5>
+                <h6 style="color: #fff; font-weight: 350;">INDICADORES DE LLAMADA</h6>
+                <div>
+                    <ul class="list-group" id="Indicadores">
+                        <li class="list-group-item d-flex col-12 justify-content-between" id="IndicadoresCol">
+                            <div class="float-left" style="text-align: initial;">En IVR</div>
+                            <div id="lbenivr">0</div>
+                        </li>
+                        <li class="list-group-item d-flex col-12 justify-content-between" id="IndicadoresCol">
+                            <div class="float-left" style="text-align: initial;">En espera</div>
+                            <div id="lbenEspera">0</div>
+                        </li>
+                        <li class="list-group-item d-flex col-12 justify-content-between" id="IndicadoresCol">
+                            <div>En atención</div>
+                            <div id="lenAtencion">0</div>
+                        </li>
+                        <li class="list-group-item d-flex col-12 justify-content-between" id="IndicadoresCol">
+                            <div>+4:30</div>
+                            <div id="lMayor">0</div>
+                        </li>
+                        <li class="list-group-item d-flex col-12 justify-content-between" id="IndicadoresCol">
+                            <div>Recibidas</div>
+                            <div id="lblrecibidas">0</div>
+                        </li>
+                        <li class="list-group-item d-flex col-12 justify-content-between" id="IndicadoresCol">
+                            <div>Atendidas</div>
+                            <div id="lbllContestadas">0</div>
+                        </li>
+                        <li class="list-group-item d-flex col-12 justify-content-between" id="IndicadoresCol">
+                            <div>Abandonadas</div>
+                            <div id="lbllAbandonadas">0</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="modal fade bd-example-modal-lg" id="alta-cambio" tabindex="1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="titulo_modal"> </h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          				    <span aria-hidden="true">&times;</span>
+        			        </button>
+                        </div>
+                        <div class="modal-body" style="padding: 0;">
+                            <div class="panel" id="panelContent" style="margin-bottom: 0px;">
+                                <form class="form">
+                                    <div class="form-group col-lg-6 float-lg-left my-2">
+                                        <label>Identificador</label>
+                                        <input type="text" class="form-control" id="idScript" placeholder="" disabled>
+                                    </div>
+                                    <div class="form-group col-lg-12 float-lg-left my-2">
+                                        <label>Descripción:</label> <input type="text" class="form-control" id="dscScript" placeholder="">
+                                    </div>
+                                    <div class="form-group col-lg-12 float-lg-left my-2">
+                                        <label>Script:</label>
+                                        <input type="text" class="form-control" id="inputScript" placeholder="">
+                                    </div>
+                                    <br>
+                                    <div class="form-group col-lg-12 float-lg-left my-2">
+                                        <label>Tipo de Script:</label>
+                                        <select class="form-control" id="tipoScriptAlta"></select>
+                                    </div>
+                                    <div class="form-group col-lg-12 float-lg-left my-2">
+                                        <label>Shortcut:</label>
+                                        <input type="text" class="form-control" id="shorScript" placeholder="">
+                                    </div>
+
+                                </form>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                            <button onclick="btnGuardarFormulario_onClick();" type="button" class="btn btn-primary">Guardar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--Indicador 1-->
+            <div class="col-md-3 offset-2 float-left mt-3 table-responsive" id="indicador2" style="background: rgb(0,204,102);
+                        background: linear-gradient(180deg, rgba(0,204,102,1) 0%, rgba(51,51,51,1) 100%); height: 100%; width: 100%; height: 80%; top:-4px;">
+                <br>
+                <img src="img/imgAgente.png" style="float: left; margin-left: 5%;">
+                <h5 style="color: #fff; font-weight: 350;">TODAS LAS CAMPAÑAS</h5>
+                <br>
+                <div data-type="timetable" data-id="85503" id="wgt-85503" class="tap-sport-tools" style="width:100%; height:auto;">
+                    <ul class="list-group" id="allcampanas">
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    <!--Configurar llamada-->
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Configuración de video</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+                </div>
+                <div class="modal-body">
+                    <div align="left">
+                        <div class="form-group">
+                            <input type="radio" name="radiobtnVideo" id="RnumLlamadas"> Número de llamadas <br><br>
+                            <input id="numLLamadas" type="number" class="form-control" aria-required="true" aria-invalid="false" value="0" min="0">
+
+                            <input type="radio" name="radiobtnVideo" id="RnumTiempo"> Número de tiempo <br><br>
+                            <div class="row">
+                                <div class="col-md-3"><input id="Horas" type="number" class="form-control" aria-required="true" aria-invalid="false" value="00" min="0" max="24"></div>
+                                <div class="col-md-1"><label>:</label></div>
+                                <div class="col-md-3"><input id="minutos" type="number" class="form-control" aria-required="true" aria-invalid="false" value="00" min="0" max="60"></div>
+                                <div class="col-md-1"><label>:</label></div>
+                                <div class="col-md-3"><input id="segundos" type="number" class="form-control" aria-required="true" aria-invalid="false" value="00" min="0" max="60"></div>
+                            </div>
+
+                            <input type="radio" name="radiobtnVideo" id="RnumDias"> Número de días <br><br>
+                            <input id="numDias" type="text" class="form-control" aria-required="number" value="0" aria-invalid="false" min="0">
+
+                            <input type="radio" name="radiobtnVideo" id="Rsiempre"> Siempre <br>
+
+                            <input type="radio" name="radiobtnVideo" id="Rno"> No grabar <br>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="limpiarVideo()" data-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" onclick="guardarVideo()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    </div>
+    <script src="js/inicio.js"></script>
+</body>
+
+</html>

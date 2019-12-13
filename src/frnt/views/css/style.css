@@ -1,0 +1,188 @@
+
+body{
+	background-image: url(../img/fondo.png);
+	background-size: 100% 100%;
+	
+}
+
+#divOpen{
+	background-image: url(../img/spc.png);
+	background-size: 100% 100%;
+}
+
+#displayTipificacion{
+	background-image: url(../img/spc.png);
+	background-size: 100% 100%;
+}
+
+.circulo_estatus {
+	width: 20px;
+	height: 20px;
+	-moz-border-radius: 50%;
+	-webkit-border-radius: 50%;
+	border-radius: 50%;
+	background: #5cb85c;
+}
+
+.bigText {
+	font-size: 42px;
+	margin-top: -57px;
+	font-weight: 700;
+	color: #5e5e5e;
+	margin-left: 21px;
+}
+
+#divLlamada{
+	background-image: url(../img/bg-degradado.png);
+	background-size: 100% 100%;
+}
+.tit{
+	width: 50px;
+}
+
+.transparente{
+
+	 background:transparent;
+	 color: #ada8a8;
+	 border: none;
+	 border-bottom: solid 1px #615f5f;
+
+}
+.transparente2{
+
+	background:transparent;
+	color: #ffffff;
+	border: none;
+	border-bottom: solid 1px #bfbdbd;
+
+}
+
+
+.altaCRM {
+
+	color: #c3c3c3;
+	margin: 10px auto;
+
+}
+
+
+.altaCRM input{
+
+	background: transparent;
+    border: none;
+    outline: none;
+	border-bottom: 1px solid #989898;
+	color: #fff;
+
+}
+
+.altaCRM input::placeholder{
+
+	color: transparent;
+
+}
+
+.datosAgente{
+
+	color: #00ccff;
+	font-size: 18px;
+}
+
+.boton360 {
+    /*border: solid 5px;*/
+    width: 60px;
+    height: 60px;
+    margin: 5px;
+    padding: 10px;
+    -webkit-border-radius: 50px;
+    -moz-border-radius: 50px;
+    border-radius: 50px;
+    line-height: 32px;
+    text-transform: uppercase;
+    float: left;
+    font-size: 30px;
+    display: flex;
+    -ms-flex-align: center;
+    align-items: center;
+	text-align: center;
+	cursor: pointer;
+}
+
+
+/*scrollbar css style start*/
+#mydiv {
+	position: absolute;
+	z-index: 9;
+	cursor: pointer;
+	-webkit-box-shadow: 10px 10px 22px -4px rgba(0,0,0,0.75);
+	-moz-box-shadow: 10px 10px 22px -4px rgba(0,0,0,0.75);
+	box-shadow: 10px 10px 22px -4px rgba(0,0,0,0.75);
+  }
+
+
+::-webkit-scrollbar{
+	width:8px;
+	background-color:#cccccc;
+}
+::-webkit-scrollbar:horizontal{
+	height:8px;
+}
+::-webkit-scrollbar-track{
+	border:0px #ffffff solid;
+	border-radius:6px;
+}
+::-webkit-scrollbar-thumb{
+	background-color:#919191;
+	border:0px solid #aaa;
+	border-radius:12px;
+}
+::-webkit-scrollbar-thumb:hover{
+	background-color:#919191;
+	border:0px solid #aaa;
+}
+::-webkit-scrollbar-thumb:active{
+	background-color:#919191;
+	border:0px solid #aaa;
+}
+
+#monitorForm{
+	padding: 15px;
+	font-size: 10px;
+}
+
+#btngrp{
+	padding: 10px;
+	text-align: left;
+	font-size: 10px;
+	color: white;
+}
+
+#divMonitor {
+	background-image: url(../img/fondo.jpg);
+	background-size: 100% 100%;
+}
+
+.btnav{
+	font-size: 12px;
+}
+
+/*scrollbar css style end*/
+#Indicadores {
+color: #fff;
+
+}
+#IndicadoresCol{
+	background: transparent;
+ border-right:none;
+   border-left: none;
+   width: 100%;
+}
+
+#alert_principal{
+	opacity: 0.8;
+    color: black;
+    position: absolute;
+    z-index: 10;
+	width: 100%;
+	display: none;
+}
