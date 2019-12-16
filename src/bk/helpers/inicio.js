@@ -8,10 +8,10 @@ const $ = require('jquery');
 //Informacion del agente
 module.exports.consultarAgentes = async(campana, cola, ID, sts, stsres) => {
 
-    const supervisor = await pool.query(querys.consultarAgentes, [campana, cola, ID, sts, stsres]);
+    /* const supervisor = await pool.query(querys.consultarAgentes, [campana, cola, ID, sts, stsres]); */
     const supervisorOut = await pool3.query(querys.consultarAgentesOut, [campana, sts, stsres, ]);
     const agentes = {};
-    agentes.in = supervisor
+    /* agentes.in = supervisor */
     agentes.out = supervisorOut
     return agentes;
 }
@@ -348,7 +348,7 @@ module.exports.lnzaRondaCampana = async(campana, arrancar_llamadas, numeroRonda,
 module.exports.consultarAgente = async(campana, arrancar_llamadas, numeroRonda) => {
     const retorno = {};
     var url = "http://93.188.164.92//BastiaanSoftwareCenter_Espartacus/php/repositorios/MonitorOutbound.php?accion=consultarAgentes&campanaId=" + campana + "&arrancarLlamadas=" + arrancar_llamadas + "&NumeroRonda=" + numeroRonda;
-    console.log(url)
+    /* console.log(url) */
     var request = require('request');
     request(url, await
         function(error, response, body) {
@@ -362,5 +362,5 @@ module.exports.consultarAgente = async(campana, arrancar_llamadas, numeroRonda) 
             }
 
         });
-    console.log(retorno);
+    /* console.log(retorno); */
 }

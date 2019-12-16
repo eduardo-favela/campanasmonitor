@@ -70,7 +70,7 @@ ipcRenderer.on('consultarSupervisoresResult', (event, datos) => {
     console.log(datos);
     supervisor_firm = datos[0].ID;
     if (datos.length > 0) {
-        var loop = setInterval(local, time);
+        /* var loop = setInterval(local, time); */
 
         function local() {
             /* ipcRenderer.send('getConsultarAgentes', '', '', datos[0].ID, '', '')
@@ -78,10 +78,10 @@ ipcRenderer.on('consultarSupervisoresResult', (event, datos) => {
             ipcRenderer.send('conIndicadores', '', '', datos[0].ID, '', '')
             ipcRenderer.send('getindicadoresOut', '') */
         }
-        $('#btnConsultas').on('click', function() {
+        /* $('#btnConsultas').on('click', function() {
                 clearInterval(loop);
-            })
-            //ipcRenderer.send('agDisponibles_',datos[0].ID)
+            }) */
+        //ipcRenderer.send('agDisponibles_',datos[0].ID)
         $("#supervisorComboid").append("<option value='" + datos[0].ID + "'>" + datos[0].DSC + "</option>")
     } else {
         $("#supervisorComboid").append("<option value='NO APLICA'>NO APLICA</option>")
@@ -92,22 +92,22 @@ ipcRenderer.on('consultarSupervisoresResult', (event, datos) => {
 //consultar agentes
 
 ipcRenderer.on('getConsultarAgentesResult', (event, datos) => {
-    console.log(datos.in, datos.out);
-    let enLlamada = 0;
-    let lMayor = 0;
-    let enLlamadaO = 0;
-    let lMayorO = 0;
+    /* console.log(datos.in, datos.out); */
+    /*  let enLlamada = 0;
+     let lMayor = 0;
+     let enLlamadaO = 0;
+     let lMayorO = 0; */
     var arr_datos = []
 
-    for (let a = 0; a < datos.in.length; a++) {
+    /* for (let a = 0; a < datos.in.length; a++) {
         arr_datos.push(datos.in[a])
 
-    }
+    } */
     for (let b = 0; b < datos.out.length; b++) {
         arr_datos.push(datos.out[b])
     }
 
-    for (var i = 0; i < datos.in.length; i++) {
+    /* for (var i = 0; i < datos.in.length; i++) {
         if (datos.in[i].segundos > 270) {
             lMayor = lMayor + 1;
         }
@@ -115,9 +115,9 @@ ipcRenderer.on('getConsultarAgentesResult', (event, datos) => {
         if (datos.in[i].sts === "EN LLAMADA") {
             enLlamada = enLlamada + 1;
         }
-    }
+    } */
 
-    for (var i = 0; i < datos.out.length; i++) {
+    /* for (var i = 0; i < datos.out.length; i++) {
         if (datos.out[i].segundos > 270) {
             lMayorO = lMayorO + 1;
         }
@@ -126,12 +126,15 @@ ipcRenderer.on('getConsultarAgentesResult', (event, datos) => {
             enLlamadaO = enLlamadaO + 1;
         }
 
-    }
+    } */
 
-    $("#lenAtencion").text(enLlamada)
+    /* $("#lenAtencion").text(enLlamada)
     $("#lMayor").text(lMayor)
     console.log(arr_datos.sort(arr_datos.ext))
-    llenarGrid(arr_datos);
+    llenarGrid(arr_datos); */
+
+    mostraragentescmp(arr_datos);
+
 });
 
 //Indicadores de llamada
@@ -278,13 +281,16 @@ ipcRenderer.on('getAllCampanasResult', async(event, datos) => {
     console.log(datos);
     var i = 0;
     $("#allcampanas").html("");
-
     datos.out.forEach(function(modulo, index) {
         $("#allcampanas").append('<li class="list-group-item d-flex col-12 justify-content-between" id="IndicadoresCol">' +
-            '<div class="float-left" style="text-align: initial; color:#fff;">' + modulo.DSC + '<br>' +
-            '<label>Universo: ' + modulo.UNI + '</label></div>' +
-            '<button class="btn float-right" id="playcampana" onclick="lnzRonda(' + modulo.ID + ', playibd' + index + ')" style="height: fit-content; width: fit-content;">' +
-            '<i id="playibd' + index + '" class="icon-play3" style="color: #269EE3; font-size: 15px;"></i></button>' +
+            '<div class="float-left my-auto" style="text-align: initial; color:#fff;">' + modulo.DSC + '<br>' +
+            '<label class="my-auto py-auto">Universo: ' + modulo.UNI + '</label></div>' +
+            '<div class="float-right my-auto style="text-align:right;">' +
+            '<button class="btn my-auto" id="playcampana" onclick="lnzRonda(' + modulo.ID + ', playobd' + index + ')" style="height: fit-content; width: fit-content;">' +
+            '<i id="playobd' + index + '" class="icon-play3" style="color: #ffff; font-size: 15px;"></i></button>' +
+            '<button class="btn my-auto" id="veragtscmpbtn" onclick="veragtscmp(' + modulo.ID + ')" style="height: fit-content; width: fit-content;">' +
+            '<i id="agts' + index + '" class="icon-users" style="color: #ffff; font-size: 15px;"></i></button>' +
+            '</div>' +
             '</li>');
     });
 });
@@ -849,27 +855,62 @@ $(document).ready(function() {
         $(this).addClass('selected').siblings().removeClass('selected');
         var value = $(this).find('td:first').html();
     });
+    tablavacia();
+});
 
-    /* if (!$.trim($('#campanasactivas').html()).length) {
-        $('#campanasactivas').append('<li class="list-group-item d-flex col-12 justify-content-between" id="IndicadoresCol">' +
+function tablavacia() {
+    if (!$.trim($('#campanasactivas').html()).length) {
+        $('#campanasactivas').append('<li class="list-group-item d-flex col-12 justify-content-between vacia" id="IndicadoresCol">' +
             '<div style="text-align: initial; color:#fff;">' +
             '<label>No hay campañas activas</label>' +
             '</div>' +
             '</li>')
-    } */
-});
+    }
+    if (!$.trim($('#allcampanas').html()).length) {
+        $('#allcampanas').append('<li class="list-group-item d-flex col-12 justify-content-between vacia" id="IndicadoresCol">' +
+            '<div style="text-align: initial; color:#fff;">' +
+            '<label>No hay campañas inactivas</label>' +
+            '</div>' +
+            '</li>')
+    }
+
+}
+
+
+function veragtscmp(campana) {
+    ipcRenderer.send('getConsultarAgentes', campana, '', '', '', '');
+    $('#agtcmp').modal('toggle');
+}
+
+function mostraragentescmp(datos) {
+    $("#agtscampanas").html("");
+
+    if (datos.length != 0) {
+        datos.forEach(function(agente, index) {
+            $("#agtscampanas").append("<p class='pt-2'><b>Agente: </b>" + agente.nom + "</p>" +
+                "<p><b>Estatus: </b>" + agente.sts + "</p>" +
+                "<hr>");
+        });
+    } else {
+        $("#agtscampanas").append("<p>No hay agentes disponibles</p>");
+    }
+}
 
 function lnzRonda(campana, idelement) {
     cronoval = 1;
     bandera = 0;
     numeroRonda = "01";
     arrancar_llamadas = "SI"
-    var row = idelement.parentNode.parentNode;
+    var row = idelement.parentNode.parentNode.parentNode;
     row.parentNode.removeChild(row);
-    row.childNodes[1].setAttribute("onClick", "detenerRonda(" + campana + ", " + idelement.id + ")");
-    row.childNodes[1].childNodes[0].className = "icon-stop2";
-    row.childNodes[1].childNodes[0].style = "color: red; font-size: 15px;";
+    row.childNodes[1].childNodes[0].setAttribute("onClick", "detenerRonda(" + campana + ", " + idelement.id + ")");
+    row.childNodes[1].childNodes[0].childNodes[0].className = "icon-stop2";
+    row.childNodes[1].childNodes[0].childNodes[0].style = "color: red; font-size: 15px;";
+    if ($('#campanasactivas').find('li.vacia').length != 0) {
+        $('#campanasactivas').empty();
+    }
     $("#campanasactivas").append(row);
+    tablavacia();
     /* cronometroi = setInterval(cronometro, 10); */
     /* alert(campana, arrancar_llamadas, numeroRonda, supervisor_firma); */
     ipcRenderer.send("lnzaRondaCampana", campana, arrancar_llamadas, numeroRonda, supervisor_firma);
@@ -881,12 +922,16 @@ function detenerRonda(campana, idelement) {
     bandera = 1;
     numeroRonda = "01";
     arrancar_llamadas = "NO"
-    var row = idelement.parentNode.parentNode;
+    var row = idelement.parentNode.parentNode.parentNode;
     row.parentNode.removeChild(row);
-    row.childNodes[1].setAttribute("onClick", "lnzRonda(" + campana + ", " + idelement.id + ")");
-    row.childNodes[1].childNodes[0].className = "icon-play3";
-    row.childNodes[1].childNodes[0].style = "color: #269EE3; font-size: 15px;";
+    row.childNodes[1].childNodes[0].setAttribute("onClick", "lnzRonda(" + campana + ", " + idelement.id + ")");
+    row.childNodes[1].childNodes[0].childNodes[0].className = "icon-play3";
+    row.childNodes[1].childNodes[0].childNodes[0].style = "color: #ffff; font-size: 15px;";
+    if ($('#allcampanas').find('li.vacia').length != 0) {
+        $('#allcampanas').empty();
+    }
     $("#allcampanas").append(row);
+    tablavacia();
     ipcRenderer.send("lnzaRondaCampana", campana, arrancar_llamadas, numeroRonda, supervisor_firma);
     ipcRenderer.send('consultarAgente', campana, arrancar_llamadas, numeroRonda) //consulta los agentes para lanzar las llamadas en rondas de llamada
 }

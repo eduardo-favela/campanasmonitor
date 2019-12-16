@@ -10,16 +10,19 @@ module.exports.consultarAgentes = " SELECT 'I' area, btAgenteInbId id,btAgenteIn
     " where btAgenteCmpId like concat('%',?,'%') and btAgenteInbSesion = 'S' AND btagenteCola like concat('%',?,'%') " +
     " and btagenteIdSupervis=? AND btagenteInbtStsExt like concat('%',?,'%') AND ifnull(BTESTAGNTT,'DIS') LIKE concat('%',?)";
 
-module.exports.consultarAgentesOut = " SELECT 'O' area, btAgenteOutId id,btAgenteOutNombre nom,btAgenteOutExt ext,btagenteOutStsExt sts," +
-    " CASE WHEN btagenteoutStsExt = 'EN LLAMADA' THEN  ifnull(SEC_TO_TIME(TIMESTAMPDIFF(second,btagenteouthorallam,now())), '00:00:00') ELSE '00:00:00' END duracion," +
-    " CASE WHEN btagenteoutStsExt = 'EN LLAMADA' THEN ifnull(B.BTESTAGNTCALLID,'') else '' END idllamada,ifnull(B.BTESTAGNTT, 'DIS') stsrec," +
-    " btagenteOutTelefonoCliente Telefono,BTESTAGNTPERMISO permiso,DATE_FORMAT(now(), '%d/%m/%Y') fecha," +
-    " CASE WHEN btagenteoutStsExt = 'EN LLAMADA' THEN DATE_FORMAT(btagenteouthorallam, '%H:%i:%s') ELSE '00:00:00' END hora," +
-    " CASE WHEN btagenteoutStsExt = 'EN LLAMADA' THEN ifnull(C.btContactoNombreCliente,'') else '' END nombreCliente " +
-    " FROM bstntrn.btagenteoutbound A " +
-    " LEFT JOIN bstntrn.btestagnt B ON A.btAgenteOutId = B.BTESTAGNTUSR " +
-    " LEFT JOIN bstntrn.btcontacto C ON (C.btcontactoconsecutivo = A.btAgenteOutClienteId and C.btcontactocmpid = A.btagentecmpid) " +
-    " where btAgenteOutSesion = 'S' AND btAgenteCmpId like concat('%',?,'%') and btagenteOutStsExt like concat('%',?,'%') AND ifnull(BTESTAGNTT,'DIS') LIKE concat('%',?)";
+module.exports.consultarAgentesOut = " SELECT 'O' area, btAgenteOutId id,btAgenteOutNombre nom,btAgenteOutExt ext,btagenteOutStsExt sts, " +
+    "CASE WHEN btagenteoutStsExt = 'EN LLAMADA' THEN  ifnull(SEC_TO_TIME(TIMESTAMPDIFF(second,btagenteouthorallam,now())), '00:00:00') ELSE '00:00:00' END duracion, " +
+    "CASE WHEN btagenteoutStsExt = 'EN LLAMADA' THEN ifnull(B.BTESTAGNTCALLID,'') else '' END idllamada, " +
+    "ifnull(B.BTESTAGNTT, 'DIS') stsrec, " +
+    "btagenteOutTelefonoCliente Telefono, " +
+    "BTESTAGNTPERMISO permiso, " +
+    "DATE_FORMAT(now(), '%d/%m/%Y') fecha, " +
+    "CASE WHEN btagenteoutStsExt = 'EN LLAMADA' THEN DATE_FORMAT(btagenteouthorallam, '%H:%i:%s') ELSE '00:00:00' END hora, " +
+    "CASE WHEN btagenteoutStsExt = 'EN LLAMADA' THEN ifnull(C.btContactoNombreCliente,'') else '' END nombreCliente " +
+    "FROM bstntrn.btagenteoutbound A " +
+    "LEFT JOIN bstntrn.btestagnt B ON A.btAgenteOutId = B.BTESTAGNTUSR " +
+    "LEFT JOIN bstntrn.btcontacto C ON (C.btcontactoconsecutivo = A.btAgenteOutClienteId and C.btcontactocmpid = A.btagentecmpid) " +
+    "where btAgenteOutSesion ='S' AND btAgenteCmpId = ? and btagenteOutStsExt like concat('%',?,'%') AND ifnull(BTESTAGNTT,'DIS') LIKE concat('%',?);";
 
 module.exports.getAllCampanas = "SELECT btcampanaid ID, CONCAT(btcampanaid, '-', btcampanadescripcion) DSC, btcampanauniverso UNI FROM bstntrn.btcampanas where bstnCanalId = 'IBD' ";
 

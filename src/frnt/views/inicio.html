@@ -77,45 +77,20 @@
                 </div>
             </div>
 
-            <div class="modal fade bd-example-modal-lg" id="alta-cambio" tabindex="1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-lg">
+            <div class="modal fade bd-example-modal-lg" id="agtcmp" tabindex="1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-scrollable modal-lg">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="titulo_modal"> </h5>
+                            <h5 class="modal-title" id="titulo_modal">Agentes disponibles para la campaña</h5>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           				    <span aria-hidden="true">&times;</span>
         			        </button>
                         </div>
-                        <div class="modal-body" style="padding: 0;">
-                            <div class="panel" id="panelContent" style="margin-bottom: 0px;">
-                                <form class="form">
-                                    <div class="form-group col-lg-6 float-lg-left my-2">
-                                        <label>Identificador</label>
-                                        <input type="text" class="form-control" id="idScript" placeholder="" disabled>
-                                    </div>
-                                    <div class="form-group col-lg-12 float-lg-left my-2">
-                                        <label>Descripción:</label> <input type="text" class="form-control" id="dscScript" placeholder="">
-                                    </div>
-                                    <div class="form-group col-lg-12 float-lg-left my-2">
-                                        <label>Script:</label>
-                                        <input type="text" class="form-control" id="inputScript" placeholder="">
-                                    </div>
-                                    <br>
-                                    <div class="form-group col-lg-12 float-lg-left my-2">
-                                        <label>Tipo de Script:</label>
-                                        <select class="form-control" id="tipoScriptAlta"></select>
-                                    </div>
-                                    <div class="form-group col-lg-12 float-lg-left my-2">
-                                        <label>Shortcut:</label>
-                                        <input type="text" class="form-control" id="shorScript" placeholder="">
-                                    </div>
+                        <div class="modal-body" id="agtscampanas" style="padding: 0;">
 
-                                </form>
-                            </div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                            <button onclick="btnGuardarFormulario_onClick();" type="button" class="btn btn-primary">Guardar</button>
                         </div>
                     </div>
                 </div>
