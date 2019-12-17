@@ -282,13 +282,16 @@ ipcRenderer.on('getAllCampanasResult', async(event, datos) => {
     var i = 0;
     $("#allcampanas").html("");
     datos.out.forEach(function(modulo, index) {
+        let idcampana = modulo.ID.toString();
+        let dscCampana = modulo.DSC.toString();
+        let universo = modulo.UNI.toString();
         $("#allcampanas").append('<li class="list-group-item d-flex col-12 justify-content-between" id="IndicadoresCol">' +
-            '<div class="float-left my-auto" style="text-align: initial; color:#fff;">' + modulo.DSC + '<br>' +
-            '<label class="my-auto py-auto">Universo: ' + modulo.UNI + '</label></div>' +
+            '<div class="float-left my-auto" style="text-align: initial; color:#fff;">' + dscCampana + '<br>' +
+            '<label class="my-auto py-auto">Universo: ' + universo + '</label></div>' +
             '<div class="float-right my-auto style="text-align:right;">' +
-            '<button class="btn my-auto" id="playcampana" onclick="lnzRonda(' + modulo.ID + ', playobd' + index + ')" style="height: fit-content; width: fit-content;">' +
+            '<button class="btn my-auto" id="playcampana" onclick="lnzRonda(' + idcampana + ', playobd' + index + ')" style="height: fit-content; width: fit-content;">' +
             '<i id="playobd' + index + '" class="icon-play3" style="color: #ffff; font-size: 15px;"></i></button>' +
-            '<button class="btn my-auto" id="veragtscmpbtn" onclick="veragtscmp(' + modulo.ID + ')" style="height: fit-content; width: fit-content;">' +
+            '<button class="btn my-auto" id="veragtscmpbtn' + idcampana + '" onclick="veragtscmp(veragtscmpbtn' + idcampana + ')" style="height: fit-content; width: fit-content;">' +
             '<i id="agts' + index + '" class="icon-users" style="color: #ffff; font-size: 15px;"></i></button>' +
             '</div>' +
             '</li>');
@@ -878,7 +881,8 @@ function tablavacia() {
 
 
 function veragtscmp(campana) {
-    ipcRenderer.send('getConsultarAgentes', campana, '', '', '', '');
+    let idcampana = campana.id.replace('veragtscmpbtn', '');
+    ipcRenderer.send('getConsultarAgentes', idcampana, supervisor_firm, '', '');
     $('#agtcmp').modal('toggle');
 }
 
@@ -935,6 +939,18 @@ function detenerRonda(campana, idelement) {
     ipcRenderer.send("lnzaRondaCampana", campana, arrancar_llamadas, numeroRonda, supervisor_firma);
     ipcRenderer.send('consultarAgente', campana, arrancar_llamadas, numeroRonda) //consulta los agentes para lanzar las llamadas en rondas de llamada
 }
+
+
+function cerrarVentana() {
+
+    if ($("#divOpen").hasClass("d-flex")) {
+        $("#divOpen").removeClass("d-flex")
+    }
+    $("#divOpen").hide();
+    $("#webview").remove();
+    $("#divMonitor").show();
+}
+
 
 function cronometro() {
     if (bandera == 0) {

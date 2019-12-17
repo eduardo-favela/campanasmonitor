@@ -6,13 +6,12 @@ const querys = require('../querys/inicio');
 const $ = require('jquery');
 
 //Informacion del agente
-module.exports.consultarAgentes = async(campana, cola, ID, sts, stsres) => {
+module.exports.consultarAgentes = async(campana, ID, sts, stsres) => {
 
-    /* const supervisor = await pool.query(querys.consultarAgentes, [campana, cola, ID, sts, stsres]); */
-    const supervisorOut = await pool3.query(querys.consultarAgentesOut, [campana, sts, stsres, ]);
+    const supervisorOut = await pool3.query(querys.consultarAgentesOut, [campana, ID, sts, stsres, ]);
     const agentes = {};
-    /* agentes.in = supervisor */
-    agentes.out = supervisorOut
+    agentes.out = supervisorOut;
+    /* console.log(agentes); */
     return agentes;
 }
 module.exports.getAllCampanas = async(datos) => {
@@ -34,10 +33,8 @@ module.exports.getAllEstatus = async(datos) => {
 module.exports.consultarSupervisores = async(usuarioid) => {
 
 
-        const allSupervisores = await pool.query(querys.consultarSupervisores, [usuarioid]);
+        const allSupervisores = await pool3.query(querys.consultarSupervisores, [usuarioid]);
         return allSupervisores;
-
-
     }
     //Indicadores
 module.exports.conIndicadores = async(campana, cola, ID, sts, stsres) => {

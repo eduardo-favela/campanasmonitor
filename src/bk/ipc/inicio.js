@@ -3,10 +3,7 @@ const { ipcMain } = require('electron');
 const helper = require('../helpers/inicio');
 
 //Informacion del Agente
-ipcMain.on('getConsultarAgentes', async(event, campana, cola, ID, sts, stsres) => {
-    if (cola == '0') {
-        cola = '';
-    }
+ipcMain.on('getConsultarAgentes', async(event, campana, ID, sts, stsres) => {
     if (sts == "ALL") {
         sts = '';
     }
@@ -19,7 +16,7 @@ ipcMain.on('getConsultarAgentes', async(event, campana, cola, ID, sts, stsres) =
     if (campana == '') {
         campana = '';
     }
-    const consultarAgentes = await helper.consultarAgentes(campana, cola, ID, sts, stsres);
+    const consultarAgentes = await helper.consultarAgentes(campana, ID, sts, stsres);
     event.reply('getConsultarAgentesResult', consultarAgentes);
 });
 
@@ -85,7 +82,7 @@ ipcMain.on('getConsultarReceso', async(event, agnt, valor, modulo) => {
 });
 //cerrar sesion agente
 ipcMain.on('cerrarSesionAgt', async(event, agnt, modulo) => {
-    const cerrarAgt = await helper.cerrarSesionAgt(agnt,modulo);
+    const cerrarAgt = await helper.cerrarSesionAgt(agnt, modulo);
     event.reply('cerrarSesionAgtResult', cerrarAgt)
 });
 
@@ -119,7 +116,7 @@ ipcMain.on('getindicadoresOut', async(event, campana) => {
 ipcMain.on('lnzaRondaCampana', async(event, campana, arrancar_llamadas, numeroRonda, supervisor) => {
     console.log("ipc ronda");
     const indicadores = await helper.lnzaRondaCampana(campana, arrancar_llamadas, numeroRonda, supervisor)
-    //event.reply('getindicadoresOutResult', indicadores)
+        //event.reply('getindicadoresOutResult', indicadores)
 });
 
 //lanza las rondas de llamadas
