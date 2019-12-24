@@ -17,7 +17,7 @@ module.exports.consultarAgentes = async(campana, ID, sts, stsres) => {
 module.exports.getAllCampanas = async(datos) => {
     const allCampanasOut = await pool3.query(querys.getAllCampanasOut, []);
     var campanas = {};
-    campanas.out = allCampanasOut;
+    campanas = allCampanasOut;
     return campanas;
 }
 
@@ -44,6 +44,20 @@ module.exports.conIndicadores = async(campana, cola, ID, sts, stsres) => {
     arr_indicadores.in = conIndicadores;
     arr_indicadores.out = supervisorOut;
     return arr_indicadores;
+}
+
+module.exports.getduracioncampana = async(idcampana, campo) => {
+    console.log(idcampana, campo);
+    let duracion = [];
+    if (campo === "btfechahoraprimronda") {
+        duracion = await pool3.query(querys.getduracioncampanaprimronda, [idcampana]);
+    } else if (campo === "btfechahorasegronda") {
+        duracion = await pool3.query(querys.getduracioncampanasegronda, [idcampana]);
+    } else if (campo === "btfechahoraterronda") {
+        duracion = await pool3.query(querys.getduracioncampanaterronda, [idcampana]);
+    }
+    console.log(duracion);
+    return duracion[0];
 }
 
 module.exports.getConsultarMetricas = async(cola) => {
@@ -143,188 +157,187 @@ module.exports.getConsultarMetricas = async(cola) => {
 
 //cerrar sesion agente
 module.exports.cerrarSesionAgt = async(agnt, modulo) => {
-    if (modulo == "I") {
-        const cerrarSesionAgt = await pool.query(querys.cerrarSesionAgt, [agnt]);
-        return cerrarSesionAgt;
-    } else {
-        const cerrarSesionAgt = await pool3.query(querys.cerrarSesionAgtOut, [agnt]);
-        return cerrarSesionAgt;
-    }
-}
-
-
-module.exports.getAllColas = async(datos) => {
-    const allColas = await pool.query(querys.getAllColas, []);
-    var colas = {};
-    return colas.colas = allColas;
-}
-
-module.exports.getAgenteVideo = async(usr, modulo) => {
-    if (modulo == "I") {
-        const agntVideo = await pool.query(querys.getAgenteVideo, [usr]);
-        return agntVideo;
-    } else {
-        const agntVideo = await pool3.query(querys.getAgenteVideo, [usr]);
-        return agntVideo;
-    }
-}
-
-module.exports.configurarVideo = async(video, usr, ext, modulo) => {
-    if (modulo == "I") {
-        const agt = await pool.query(querys.getAgenteVideo, [usr])
-        if (agt.length > 0) {
-            if (video.ConfiguraGrabacion == "numLlamadas") {
-                const agt = await pool.query(querys.configuracionNumLlamadas, [video.ConfiguraGrabacion, video.Valor, usr])
-            } else if (video.ConfiguraGrabacion == "numDias") {
-                const agt = await pool.query(querys.configuracionNumDias, [video.ConfiguraGrabacion, video.Valor, video.Valor, usr])
-            } else if (video.ConfiguraGrabacion == "numTiempo") {
-                const agt = await pool.query(querys.configuracionNumTiempo, [video.ConfiguraGrabacion, video.Valor, video.Valor, usr])
-            } else if (video.ConfiguraGrabacion == "siempre" || video.ConfiguraGrabacion == "no") {
-                const agt = await pool.query(querys.configuracionVideo, [video.ConfiguraGrabacion, usr])
-            }
+        if (modulo == "I") {
+            const cerrarSesionAgt = await pool.query(querys.cerrarSesionAgt, [agnt]);
+            return cerrarSesionAgt;
         } else {
-            const agt = await pool.query(querys.newConfiguracion, [ext, '', video.ConfiguraGrabacion, video.Valor, usr])
-        }
-    } else {
-        const agt = await pool3.query(querys.getAgenteVideo, [usr])
-        if (agt.length > 0) {
-            if (video.ConfiguraGrabacion == "numLlamadas") {
-                const agt = await pool3.query(querys.configuracionNumLlamadas, [video.ConfiguraGrabacion, video.Valor, usr])
-            } else if (video.ConfiguraGrabacion == "numDias") {
-                const agt = await pool3.query(querys.configuracionNumDias, [video.ConfiguraGrabacion, video.Valor, video.Valor, usr])
-            } else if (video.ConfiguraGrabacion == "numTiempo") {
-                const agt = await pool3.query(querys.configuracionNumTiempo, [video.ConfiguraGrabacion, video.Valor, video.Valor, usr])
-            } else if (video.ConfiguraGrabacion == "siempre" || video.ConfiguraGrabacion == "no") {
-                const agt = await pool3.query(querys.configuracionVideo, [video.ConfiguraGrabacion, usr])
-            }
-        } else {
-            const agt = await pool3.query(querys.newConfiguracion, [ext, '', video.ConfiguraGrabacion, video.Valor, usr])
+            const cerrarSesionAgt = await pool3.query(querys.cerrarSesionAgtOut, [agnt]);
+            return cerrarSesionAgt;
         }
     }
-}
+    /* 
+
+    module.exports.getAllColas = async(datos) => {
+        const allColas = await pool.query(querys.getAllColas, []);
+        var colas = {};
+        return colas.colas = allColas;
+    }
+
+    module.exports.getAgenteVideo = async(usr, modulo) => {
+        if (modulo == "I") {
+            const agntVideo = await pool.query(querys.getAgenteVideo, [usr]);
+            return agntVideo;
+        } else {
+            const agntVideo = await pool3.query(querys.getAgenteVideo, [usr]);
+            return agntVideo;
+        }
+    }
+
+    module.exports.configurarVideo = async(video, usr, ext, modulo) => {
+        if (modulo == "I") {
+            const agt = await pool.query(querys.getAgenteVideo, [usr])
+            if (agt.length > 0) {
+                if (video.ConfiguraGrabacion == "numLlamadas") {
+                    const agt = await pool.query(querys.configuracionNumLlamadas, [video.ConfiguraGrabacion, video.Valor, usr])
+                } else if (video.ConfiguraGrabacion == "numDias") {
+                    const agt = await pool.query(querys.configuracionNumDias, [video.ConfiguraGrabacion, video.Valor, video.Valor, usr])
+                } else if (video.ConfiguraGrabacion == "numTiempo") {
+                    const agt = await pool.query(querys.configuracionNumTiempo, [video.ConfiguraGrabacion, video.Valor, video.Valor, usr])
+                } else if (video.ConfiguraGrabacion == "siempre" || video.ConfiguraGrabacion == "no") {
+                    const agt = await pool.query(querys.configuracionVideo, [video.ConfiguraGrabacion, usr])
+                }
+            } else {
+                const agt = await pool.query(querys.newConfiguracion, [ext, '', video.ConfiguraGrabacion, video.Valor, usr])
+            }
+        } else {
+            const agt = await pool3.query(querys.getAgenteVideo, [usr])
+            if (agt.length > 0) {
+                if (video.ConfiguraGrabacion == "numLlamadas") {
+                    const agt = await pool3.query(querys.configuracionNumLlamadas, [video.ConfiguraGrabacion, video.Valor, usr])
+                } else if (video.ConfiguraGrabacion == "numDias") {
+                    const agt = await pool3.query(querys.configuracionNumDias, [video.ConfiguraGrabacion, video.Valor, video.Valor, usr])
+                } else if (video.ConfiguraGrabacion == "numTiempo") {
+                    const agt = await pool3.query(querys.configuracionNumTiempo, [video.ConfiguraGrabacion, video.Valor, video.Valor, usr])
+                } else if (video.ConfiguraGrabacion == "siempre" || video.ConfiguraGrabacion == "no") {
+                    const agt = await pool3.query(querys.configuracionVideo, [video.ConfiguraGrabacion, usr])
+                }
+            } else {
+                const agt = await pool3.query(querys.newConfiguracion, [ext, '', video.ConfiguraGrabacion, video.Valor, usr])
+            }
+        }
+    } */
 
 module.exports.getAllSupervisores = async(datos) => {
-    const allSupervisor = await pool.query(querys.getSupervisor, [datos]);
-    var supervisores = {};
-    if (allSupervisor.length <= 0) {
-        const allSupervisores = await pool.query(querys.getAllSupervisores, []);
-        return supervisores.supervisores = allSupervisores;
-    } else {
-        return supervisores.supervisores = allSupervisor;
+        const allSupervisor = await pool.query(querys.getSupervisor, [datos]);
+        var supervisores = {};
+        if (allSupervisor.length <= 0) {
+            const allSupervisores = await pool.query(querys.getAllSupervisores, []);
+            return supervisores.supervisores = allSupervisores;
+        } else {
+            return supervisores.supervisores = allSupervisor;
+        }
+
+    }
+    /* 
+    //Recesos
+    module.exports.getConsultaReceso = async(agnt, valor, modulo) => {
+        retorno = {}
+        if (modulo == "I") {
+            const receso = await pool.query(querys.agenteReceso, [agnt]);
+            //validacion de si el usuario solicitó un receso
+            if (receso.length > 0) {
+                //valida el valor pasado por el boton en inicio.html
+                if (valor == 1) {
+                    //autoriza el receso
+                    const autReceso = await pool.query(querys.autorizaReceso, [agnt]);
+                    retorno.valido = true;
+                    retorno.mensaje = "Receso Autorizado"
+                } else {
+                    //rechaza el receso
+                    const rechReceso = await pool.query(querys.rechazarReceso, [agnt]);
+                    retorno.valido = true;
+                    retorno.mensaje = "Receso Rechazado"
+                }
+            } else {
+                retorno.valido = false;
+                retorno.mensaje = "Agente no solicitó receso"
+            }
+            return retorno;
+        } else {
+            const receso = await pool3.query(querys.agenteReceso, [agnt]);
+            //validacion de si el usuario solicitó un receso
+            if (receso.length > 0) {
+                //valida el valor pasado por el boton en inicio.html
+                if (valor == 1) {
+                    //autoriza el receso
+                    const autReceso = await pool3.query(querys.autorizaReceso, [agnt]);
+                    retorno.valido = true;
+                    retorno.mensaje = "Receso Autorizado"
+                } else {
+                    //rechaza el receso
+                    const rechReceso = await pool3.query(querys.rechazarReceso, [agnt]);
+                    retorno.valido = true;
+                    retorno.mensaje = "Receso Rechazado"
+                }
+            } else {
+                retorno.valido = false;
+                retorno.mensaje = "Agente no solicitó receso"
+            }
+            return retorno;
+        }
+
     }
 
-}
+    //Acciones Llamadas
+    module.exports.accionesLlamadas = async(extAgnt, extEscucha, valor) => {
+        const retorno = {};
+        if (valor == 1) {
+            //escucha llamada
+            var url = "http://31.220.63.112/BastiaanSoftwareCenter_Espartacus/php/repositorios/Asterisk_cli.php?&accion=crearArchivo&extesionEscucha=" + extEscucha + "&extesionAgente=" + extAgnt + "&contexto=app-chanspy";
+            var request = require('request');
+            request(url, await
+                function(error, response, body) {
 
-//Recesos
-module.exports.getConsultaReceso = async(agnt, valor, modulo) => {
-    retorno = {}
-    if (modulo == "I") {
-        const receso = await pool.query(querys.agenteReceso, [agnt]);
-        //validacion de si el usuario solicitó un receso
-        if (receso.length > 0) {
-            //valida el valor pasado por el boton en inicio.html
-            if (valor == 1) {
-                //autoriza el receso
-                const autReceso = await pool.query(querys.autorizaReceso, [agnt]);
-                retorno.valido = true;
-                retorno.mensaje = "Receso Autorizado"
-            } else {
-                //rechaza el receso
-                const rechReceso = await pool.query(querys.rechazarReceso, [agnt]);
-                retorno.valido = true;
-                retorno.mensaje = "Receso Rechazado"
-            }
+                    if (error) {
+                        retorno.valido = false;
+                        retorno.mensaje = "Error de conexión con el servidor";
+                    } else {
+                        retorno.valido = true;
+                        retorno.mensaje = "Success";
+                    }
+
+                });
         } else {
-            retorno.valido = false;
-            retorno.mensaje = "Agente no solicitó receso"
+            //interviene llamada
+            var url = "http://31.220.63.112/BastiaanSoftwareCenter_Espartacus/php/repositorios/Asterisk_cli.php?&accion=crearArchivo&extesionEscucha=" + extEscucha + "&extesionAgente=" + extAgnt + "&contexto=app-inteview";
+            var request = require('request');
+            request(url, await
+                function(error, response, body) {
+
+                    if (error) {
+                        retorno.valido = false;
+                        retorno.mensaje = "Error de conexión con el servidor";
+                    } else {
+                        retorno.valido = true;
+                        retorno.mensaje = "Success";
+                    }
+
+                });
         }
         return retorno;
-    } else {
-        const receso = await pool3.query(querys.agenteReceso, [agnt]);
-        //validacion de si el usuario solicitó un receso
-        if (receso.length > 0) {
-            //valida el valor pasado por el boton en inicio.html
-            if (valor == 1) {
-                //autoriza el receso
-                const autReceso = await pool3.query(querys.autorizaReceso, [agnt]);
-                retorno.valido = true;
-                retorno.mensaje = "Receso Autorizado"
-            } else {
-                //rechaza el receso
-                const rechReceso = await pool3.query(querys.rechazarReceso, [agnt]);
-                retorno.valido = true;
-                retorno.mensaje = "Receso Rechazado"
-            }
-        } else {
-            retorno.valido = false;
-            retorno.mensaje = "Agente no solicitó receso"
-        }
-        return retorno;
     }
 
-}
+    //indicadores outbound
+    module.exports.getindicadoresOut = async(campanas) => {
+        const indicadores = {};
+        const universo = await pool3.query(querys.universo, [campanas]);
+        const realizadas = await pool4.query(querys.realizadas, [campanas]);
+        const exitosas = await pool3.query(querys.exitosas, [campanas]);
+        const noExitosas = await pool3.query(querys.noExitosas, [campanas]);
+        const rellamar = await pool3.query(querys.rellamar, [campanas]);
+        console.log(campanas)
+        indicadores.universo = universo;
+        indicadores.realizadas = realizadas;
+        indicadores.exitosas = exitosas;
+        indicadores.noExitosas = noExitosas;
+        indicadores.rellamar = rellamar;
+        return indicadores;
+    } */
 
-//Acciones Llamadas
-module.exports.accionesLlamadas = async(extAgnt, extEscucha, valor) => {
+
+module.exports.reLlamar = async(idcampana) => {
     const retorno = {};
-    if (valor == 1) {
-        //escucha llamada
-        var url = "http://31.220.63.112/BastiaanSoftwareCenter_Espartacus/php/repositorios/Asterisk_cli.php?&accion=crearArchivo&extesionEscucha=" + extEscucha + "&extesionAgente=" + extAgnt + "&contexto=app-chanspy";
-        var request = require('request');
-        request(url, await
-            function(error, response, body) {
-
-                if (error) {
-                    retorno.valido = false;
-                    retorno.mensaje = "Error de conexión con el servidor";
-                } else {
-                    retorno.valido = true;
-                    retorno.mensaje = "Success";
-                }
-
-            });
-    } else {
-        //interviene llamada
-        var url = "http://31.220.63.112/BastiaanSoftwareCenter_Espartacus/php/repositorios/Asterisk_cli.php?&accion=crearArchivo&extesionEscucha=" + extEscucha + "&extesionAgente=" + extAgnt + "&contexto=app-inteview";
-        var request = require('request');
-        request(url, await
-            function(error, response, body) {
-
-                if (error) {
-                    retorno.valido = false;
-                    retorno.mensaje = "Error de conexión con el servidor";
-                } else {
-                    retorno.valido = true;
-                    retorno.mensaje = "Success";
-                }
-
-            });
-    }
-    return retorno;
-}
-
-//indicadores outbound
-module.exports.getindicadoresOut = async(campanas) => {
-    const indicadores = {};
-    const universo = await pool3.query(querys.universo, [campanas]);
-    const realizadas = await pool4.query(querys.realizadas, [campanas]);
-    const exitosas = await pool3.query(querys.exitosas, [campanas]);
-    const noExitosas = await pool3.query(querys.noExitosas, [campanas]);
-    const rellamar = await pool3.query(querys.rellamar, [campanas]);
-    console.log(campanas)
-    indicadores.universo = universo;
-    indicadores.realizadas = realizadas;
-    indicadores.exitosas = exitosas;
-    indicadores.noExitosas = noExitosas;
-    indicadores.rellamar = rellamar;
-    return indicadores;
-}
-
-//guardar las rondas 
-module.exports.lnzaRondaCampana = async(campana, arrancar_llamadas, numeroRonda, supervisor) => {
-    const retorno = {};
-    var url = "http://93.188.164.92//BastiaanSoftwareCenter_Espartacus/php/repositorios/MonitorOutbound.php?accion=guardarRondasCampana&campanaId=" + campana + "&arrancarLlamadas=" + arrancar_llamadas + "&NumeroRonda=" + numeroRonda + "&usuario=" + supervisor;
-    console.log(url)
+    var url = "http://93.188.164.92//BastiaanSoftwareCenter_Espartacus/php/repositorios/CatalogoContactos.php?accion=ActulizarRellamar&criteriosSeleccion=" + idcampana;
     var request = require('request');
     request(url, await
         function(error, response, body) {
@@ -338,7 +351,28 @@ module.exports.lnzaRondaCampana = async(campana, arrancar_llamadas, numeroRonda,
             }
 
         });
-    console.log(retorno);
+}
+
+
+//guardar las rondas 
+module.exports.lnzaRondaCampana = async(campana, arrancar_llamadas, numeroRonda, supervisor) => {
+    const retorno = {};
+    var url = "http://93.188.164.92//BastiaanSoftwareCenter_Espartacus/php/repositorios/MonitorOutbound.php?accion=guardarRondasCampana&campanaId=" + campana + "&arrancarLlamadas=" + arrancar_llamadas + "&NumeroRonda=" + numeroRonda + "&usuario=" + supervisor;
+    /* console.log(url) */
+    var request = require('request');
+    request(url, await
+        function(error, response, body) {
+
+            if (error) {
+                retorno.valido = false;
+                retorno.mensaje = "Error de conexión con el servidor";
+            } else {
+                retorno.valido = true;
+                retorno.mensaje = "Success";
+            }
+
+        });
+    /* console.log(retorno); */
 }
 
 //consultar agentes 

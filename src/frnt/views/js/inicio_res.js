@@ -21,9 +21,12 @@ var horas = 0;
 var centesimas = 0;
 var bandera = 0;
 var cronoval = 0;
+var seleccionado_firstd;
+var cronometroi;
 var campanas = [];
 var campanasejec = [];
 var ispaused = false;
+//var reg_selec = [];
 
 ipcRenderer.send('conexion', '')
 ipcRenderer.send('getUsuario', '')
@@ -78,7 +81,10 @@ ipcRenderer.on('getConsultarAgentesResult', (event, datos) => {
         arr_datos.push(datos.out[b]);
     }
     mostraragentescmp(arr_datos);
+
 });
+
+
 
 //llena el select #comboPerfil con los perfiles que le corresponden al usuario
 ipcRenderer.on('getUsuarioModulosResult', (event, datos) => {
@@ -120,9 +126,9 @@ ipcRenderer.on('getArbolResult', async(event, datos) => {
 })
 
 ipcRenderer.on('getduracioncampanaResult', async(event, datos) => {
-    /*  console.log(datos.duracion); */
+    console.log(datos.duracion);
     let selectlabel = 'duracioncmp' + datos.ID;
-    if (datos.duracion !== '') {
+    if (datos.duracion.length != 0) {
         $('#' + selectlabel).html(datos.duracion);
     } else {
         $('#' + selectlabel).html('');
@@ -131,7 +137,7 @@ ipcRenderer.on('getduracioncampanaResult', async(event, datos) => {
 
 //llena combo de campañas
 ipcRenderer.on('getAllCampanasResult', async(event, datos) => {
-    /*  console.log(datos); */
+    console.log(datos);
     if (datos.length > 0) {
         campanas = [];
         campanasejec = [];
@@ -149,17 +155,11 @@ ipcRenderer.on('getAllCampanasResult', async(event, datos) => {
                 campanas.push(datos[b]);
             }
         }
-        /*  console.log(campanasejec);
-         console.log(campanas); */
+        console.log(campanasejec);
+        console.log(campanas);
+        llenarcampanasejec(campanasejec);
         if (!ispaused) {
             llenarcampanas(campanas);
-        }
-        llenarcampanasejec(campanasejec);
-        if (campanasejec.length > 0) {
-            for (let i = 0; i < campanasejec.length; i++) {
-                ipcRenderer.send("lnzaRondaCampana", campanasejec[i].ID, "SI", "01", supervisor_firma);
-                ipcRenderer.send('consultarAgente', campanasejec[i].ID, "SI", "01");
-            }
         }
     } else {
         tablavacia();
@@ -313,7 +313,10 @@ function dibujarBtns(nodoSeleccionada) {
             nodoPintar.CNESDSOP +
             "   </button>  "
         )
+
+
     })
+
 }
 
 function verAplicacion(nodo) {
@@ -369,6 +372,16 @@ function mostrarMensaje(titulo, mensaje) {
 
 //funcion de seleccion del agente
 $(document).ready(function() {
+    var table = $('#tableagentes').DataTable();
+
+    $('#tableagentes tbody').on('click', 'tr', function() {
+        seleccionado_firstd = $(this).find("td:eq(0)").text();
+        document.getElementById("usrSel").value = $(this).find("td:eq(12)").text();
+        document.getElementById("extSel").value = $(this).find("td:eq(11)").text();
+        document.getElementById("nombreSel").value = $(this).find("td:eq(2)").text();
+        $(this).addClass('selected').siblings().removeClass('selected');
+        var value = $(this).find('td:first').html();
+    });
     tablavacia();
 });
 
@@ -432,7 +445,6 @@ function llenarcampanas(datos) {
             '<label class="my-auto py-auto" title="Número de contactos de la campaña.">Universo: ' + universo + '</label>' +
             '<label class="ml-3 py-auto" title="Último usuario que lanzó la campaña.">Usuario: ' + modulo.ultusuario + '</label>' +
             '<label class="ml-3 py-auto" title="Fecha y hora de la última vez que fue lanzada la campaña.">Fecha: ' + modulo.fechahoraultprim.toString() + '</label>' +
-            '<label class="ml-3 py-auto" style="display:none;" title="Duración de la campaña desde que fue lanzada.">Duración: <label id="duracioncmp' + idcampana + '"></label></label>' +
             '</div>' +
             '<div class="float-right my-auto style="text-align:right;">' +
             '<button class="btn my-auto" id="playcampana" onclick="lnzRonda(\'lanzarcmp' + idcampana + '\', playobd' + idcampana + ')"' +
@@ -451,8 +463,8 @@ function buscarcmp() {
     var keyword = $('#searcher').val();
 
     if (keyword === "") {
-        ispaused = false;
         llenarcampanas(campanas);
+        ispaused = false;
     } else {
         ispaused = true;
         var filteredData = campanas.filter(function(obj) {
@@ -507,6 +519,8 @@ function lnzRonda(campana, idelement) {
             campanas.splice(i, 1);
         }
     }
+    let divlabel = '<label class="ml-3 py-auto" title="Duración de la campaña desde que fue lanzada.">Duración: <label id="duracioncmp' + camp + '"></label></label>'
+    row.childNodes[0].insertAdjacentHTML('beforeend', divlabel);
     row.childNodes[1].childNodes[0].setAttribute("onClick", "detenerRonda(detenercmp" + campana + ", " + idelement.id + ")");
     row.childNodes[1].childNodes[0].setAttribute("title", "Detener llamadas de la campaña.");
     row.childNodes[1].childNodes[0].childNodes[0].className = "icon-stop2";
@@ -535,14 +549,9 @@ function detenerRonda(campana, idelement) {
             campanasejec.splice(i, 1);
         }
     }
-    row.childNodes[1].childNodes[0].setAttribute("onClick", "lnzRonda(lanzarcmp" + campana + ", " + idelement.id + ")");
-    row.childNodes[1].childNodes[0].setAttribute("title", "Lanzar llamadas de la campaña.");
-    row.childNodes[1].childNodes[0].childNodes[0].className = "icon-play3";
-    row.childNodes[1].childNodes[0].childNodes[0].style = "color: #ffff; font-size: 15px;";
     if ($('#allcampanas').find('li.vacia').length != 0) {
         $('#allcampanas').empty();
     }
-    $("#allcampanas").append(row);
     tablavacia();
     ipcRenderer.send("lnzaRondaCampana", camp, arrancar_llamadas, numeroRonda, supervisor_firma);
     ipcRenderer.send('consultarAgente', camp, arrancar_llamadas, numeroRonda); //consulta los agentes para lanzar las llamadas en rondas de llamada
@@ -557,63 +566,4 @@ function cerrarVentana() {
     $("#divOpen").hide();
     $("#webview").remove();
     $("#divMonitor").show();
-}
-
-
-function cronometro(id1, id2) {
-    if (bandera == 0) {
-        if (centesimas < 99) {
-            centesimas++;
-            if (centesimas < 10) {
-                centesimas = "0" + centesimas
-            }
-        }
-        if (centesimas == 99) {
-            centesimas = -1;
-        }
-        if (centesimas == 0) {
-            segundos++;
-            if (segundos < 10) {
-                segundos = "0" + segundos
-            }
-        }
-        if (segundos == 60) {
-            segundos = 0;
-        }
-        if ((centesimas == 0) && (segundos == 0)) {
-            minutos++;
-            if (minutos < 10) {
-                minutos = "0" + minutos
-            }
-        }
-        if (minutos == 60) {
-            minutos = 0;
-        }
-        if ((centesimas == 0) && (segundos == 0) && (minutos == 0)) {
-            horas++;
-            if (horas < 10) {
-                horas = "0" + horas
-            }
-        }
-        if (segundos == 0) {
-            segundos = "00";
-        }
-        if (minutos == 0) {
-            minutos = "00";
-        }
-        if (horas == 0) {
-            horas = "00";
-        }
-        if (cronoval == 1) {
-            //document.getElementById(id1).innerHTML = "Corriendo TIEMPO" + " " + minutos + ":" + segundos;
-        }
-    } else {
-        //document.getElementById(id2).innerHTML = "";
-        /* document.getElementById("lblcrono2").innerHTML="";
-        document.getElementById("lblcrono3").innerHTML=""; */
-        minutos = 0;
-        segundos = 0;
-        horas = 0;
-        centesimas = 0;
-    }
 }

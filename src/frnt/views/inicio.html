@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Monitoreo - Spartacus</title>
+    <title>Monitor de ejecución</title>
     <link rel="stylesheet" href="../../../node_modules/bootstrap/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/styleResp.css">
@@ -66,29 +66,35 @@
             <div class="alert float-rigth" id="alert_principal">
             </div>
             <!--Indicador 1-->
-            <div class="col-md-3 offset-2 float-left mt-3 table-responsive" id="indicador1" style="background: rgb(38,155,222);
+            <div class="col-md-6 float-left mt-3 table-responsive" id="indicador1" style="background: rgb(38,155,222);
                 background: linear-gradient(180deg, rgba(38,155,222,1) 0%, rgba(51,51,51,1) 100%); height: 100%; width: 100%; height: 100%; top:-4px;">
                 <br>
-                <img src="img/imgTelefono.png" style="float: left; margin-left: 5%; ">
-                <h5 style="color: #fff; font-weight: 350; margin-top: 5%;">CAMPAÑAS ACTIVAS</h5>
+                <div class="lds-ellipsis float-left" id="loader" style="display: block;">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+                <h5 style="color: #fff; font-weight: 350; margin-top: 5%;" class="d-flex justify-content-center">CAMPAÑAS ACTIVAS</h5>
                 <br><br>
                 <div>
                     <ul class="list-group" id="campanasactivas">
                     </ul>
                 </div>
             </div>
-
-            <div class="modal fade bd-example-modal-lg" id="agtcmp" tabindex="1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-scrollable modal-lg">
+            <div class="modal fade bd-example-modal-md" id="agtcmp" tabindex="1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-md">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="titulo_modal">Agentes disponibles para la campaña</h5>
+                            <h5 class="modal-title" id="titulo_modal"></h5>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           				    <span aria-hidden="true">&times;</span>
         			        </button>
                         </div>
-                        <div class="modal-body" id="agtscampanas" style="padding: 0;">
+                        <div class="modal-body" style="padding: 0;">
+                            <ul class="list-group" id="agtscampanas">
 
+                            </ul>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
@@ -97,12 +103,19 @@
                 </div>
             </div>
             <!--Indicador 2-->
-            <div class="col-md-3 offset-2 float-left mt-3 table-responsive" id="indicador2" style="background: rgb(0,204,102);
+            <div class="col-md-6 float-right mt-3 table-responsive" id="indicador2" style="background: rgb(0,204,102);
                         background: linear-gradient(180deg, rgba(0,204,102,1) 0%, rgba(51,51,51,1) 100%); height: 100%; width: 100%; height: 100%; top:-4px;">
                 <br>
                 <img src="img/imgAgente.png" style="float: left; margin-left: 5%;">
                 <h5 style="color: #fff; font-weight: 350; margin-top: 5%;">TODAS LAS CAMPAÑAS</h5>
-                <br><br>
+                <br>
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" id="searcher" placeholder="Buscar campaña por nombre" aria-label="Buscar campaña" aria-describedby="basic-addon2">
+                    <div class="input-group-append">
+                        <button class="btn btn-primary" onclick="buscarcmp()" type="button"><i class="icon-search" style="color: #ffff; font-size: 15px;"></i></button>
+                    </div>
+                </div>
+                <br>
                 <div data-type="timetable" data-id="85503" id="wgt-85503" class="tap-sport-tools" style="width:100%; height:auto;">
                     <ul class="list-group" id="allcampanas">
                     </ul>
@@ -110,49 +123,6 @@
             </div>
         </div>
     </div>
-    </div>
-    <!--Configurar llamada-->
-    <!-- Modal -->
-    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Configuración de video</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-                </div>
-                <div class="modal-body">
-                    <div align="left">
-                        <div class="form-group">
-                            <input type="radio" name="radiobtnVideo" id="RnumLlamadas"> Número de llamadas <br><br>
-                            <input id="numLLamadas" type="number" class="form-control" aria-required="true" aria-invalid="false" value="0" min="0">
-
-                            <input type="radio" name="radiobtnVideo" id="RnumTiempo"> Número de tiempo <br><br>
-                            <div class="row">
-                                <div class="col-md-3"><input id="Horas" type="number" class="form-control" aria-required="true" aria-invalid="false" value="00" min="0" max="24"></div>
-                                <div class="col-md-1"><label>:</label></div>
-                                <div class="col-md-3"><input id="minutos" type="number" class="form-control" aria-required="true" aria-invalid="false" value="00" min="0" max="60"></div>
-                                <div class="col-md-1"><label>:</label></div>
-                                <div class="col-md-3"><input id="segundos" type="number" class="form-control" aria-required="true" aria-invalid="false" value="00" min="0" max="60"></div>
-                            </div>
-
-                            <input type="radio" name="radiobtnVideo" id="RnumDias"> Número de días <br><br>
-                            <input id="numDias" type="text" class="form-control" aria-required="number" value="0" aria-invalid="false" min="0">
-
-                            <input type="radio" name="radiobtnVideo" id="Rsiempre"> Siempre <br>
-
-                            <input type="radio" name="radiobtnVideo" id="Rno"> No grabar <br>
-                        </div>
-
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="limpiarVideo()" data-dismiss="modal">Cerrar</button>
-                    <button type="button" class="btn btn-primary" onclick="guardarVideo()">Guardar</button>
-                </div>
-            </div>
-        </div>
     </div>
     </div>
     </div>

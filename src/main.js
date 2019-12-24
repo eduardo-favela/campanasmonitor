@@ -86,17 +86,17 @@ function ventanaMain() {
 
     Menu.setApplicationMenu(null);
     modulos = new BrowserWindow({
-            width: 1200,
-            height: 1000,
-            icon: __dirname + "/icons/favi.png",
-            webPreferences: {
-                nodeIntegration: true,
-                nodeIntegrationInWorker: false,
-                webviewTag: true
-            },
-            show: false
-        })
-        /* modulos.webContents.openDevTools() */
+        width: 1200,
+        height: 1000,
+        icon: __dirname + "/icons/favi.png",
+        webPreferences: {
+            nodeIntegration: true,
+            nodeIntegrationInWorker: false,
+            webviewTag: true
+        },
+        show: false
+    })
+    modulos.webContents.openDevTools()
     modulos.loadFile('src/frnt/views/inicio.html')
     modulos.on('closed', () => { modulos = null })
     modulos.once('ready-to-show', () => {

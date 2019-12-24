@@ -1,24 +1,37 @@
-module.exports.consultarAgentesOut = " SELECT btAgenteOutId id,btAgenteOutNombre nom,btAgenteCmpId cmp,btAgenteOutExt ext,btagenteOutStsExt sts," +
-    " ifnull(z.BTESTAGNTT, 'DIS') stsrec, " +
-    " ifnull(date_format(TIMEDIFF(now(),BTESTAGNTSALRECESO),'%H:%i:%s'),'00:00:00') duracionreceso, btagenteOutTelefonoCliente Telefono,BTESTAGNTPERMISOID permisoid,BTESTAGNTPERMISO permiso, " +
-    " DATE_FORMAT(now(), '%d/%m/%Y') fecha, CASE WHEN btagenteoutStsExt = 'EN LLAMADA' THEN DATE_FORMAT(btagenteouthorallam, '%H:%i:%s') ELSE '00:00:00' END hora, " +
-    " CASE WHEN btagenteoutStsExt = 'EN LLAMADA' THEN  ifnull(SEC_TO_TIME(TIMESTAMPDIFF(second,btagenteouthorallam,now())), '00:00:00') ELSE '00:00:00' END duracion," +
-    " CASE WHEN btagenteoutStsExt = 'EN LLAMADA' THEN ifnull(C.btContactoNombreCliente,'') else '' END nombreCliente," +
-    " CASE WHEN btagenteoutStsExt = 'EN LLAMADA' THEN ifnull(z.BTESTAGNTCALLID,'') else '' END idllamada " +
-    " FROM siogen01.cnuser a " +
-    " inner join bstntrn.btsupervisor b on a.cnusersupervisor = b.btsupervisoidn " +
-    " inner join bstntrn.bstncanal cnl on b.btsupervisorcanal = cnl.bstnCanalIDN " +
-    " inner join bstntrn.btcampanas cmp on b.btsupervisorcamp = cmp.btcampanaid and cnl.bstnCanalId = cmp.bstnCanalId " +
-    " left join bstntrn.btagenteoutbound aout on a.cnuserid = aout.btAgenteOutId " +
-    " LEFT JOIN bstntrn.btestagnt z ON aout.btAgenteOutId = z.BTESTAGNTUSR " +
-    " LEFT JOIN bstntrn.btcontacto C ON (C.btcontactoconsecutivo = aout.btAgenteOutClienteId and C.btcontactocmpid = aout.btagentecmpid) " +
-    " WHERE aout.btAgenteOutSesion = 'S' and CNUSERBAJA='N' AND aout.btAgenteCmpId=? AND b.btsupervisoidn=? AND btagenteOutStsExt like concat('%',?,'%') AND ifnull(BTESTAGNTT,'DIS') LIKE concat('%',?)";
+module.exports.consultarAgentesOut = "SELECT btAgenteOutId id,btAgenteOutNombre nom,btAgenteOutExt ext,btagenteOutStsExt sts " +
+    "FROM bstntrn.btagenteoutbound A " +
+    "LEFT JOIN bstntrn.btestagnt B ON A.btAgenteOutId = B.BTESTAGNTUSR " +
+    "LEFT JOIN bstntrn.btcontacto C ON (C.btcontactoconsecutivo = A.btAgenteOutClienteId and C.btcontactocmpid = A.btagentecmpid) " +
+    "where btAgenteOutSesion ='S' AND btAgenteCmpId=? and btagenteOutStsExt like concat('%',?,'%') AND ifnull(BTESTAGNTT,'DIS') LIKE concat('%',?);";
 
 module.exports.getAllCampanas = "SELECT btcampanaid ID, CONCAT(btcampanaid, '-', btcampanadescripcion) DSC, btcampanauniverso UNI FROM bstntrn.btcampanas where bstnCanalId = 'IBD' ";
 
-module.exports.getAllCampanasOut = " SELECT btcampanaid ID,Concat(btcampanaid,'-',btcampanadescripcion) DSC,btcampanauniverso UNI " +
-    " FROM bstntrn.btcampanas WHERE bstnCanalId in ('OBD','WCAL','CALL') ";
+module.exports.getAllCampanasOut = " SELECT btcampanaid ID,Concat(btcampanaid,'-',btcampanadescripcion) DSC,btcampanauniverso UNI, " +
+    "ifnull(DATE_FORMAT(btfechahoraprimronda,'%d/%m/%Y %H:%i:%s'),'') fechahoraultprim," +
+    "ifnull(DATE_FORMAT(btfechahoraprimrondadet,'%d/%m/%Y %H:%i:%s'),'') fechahoraultprimdet, " +
+    "ifnull(DATE_FORMAT(btfechahorasegronda,'%d/%m/%Y %H:%i:%s'),'') fechahoraultseg," +
+    "ifnull(DATE_FORMAT(btfechahorasegrondadet,'%d/%m/%Y %H:%i:%s'),'') fechahoraultsegdet," +
+    "ifnull(DATE_FORMAT(btfechahoraterronda,'%d/%m/%Y %H:%i:%s'),'') fechahoraultter," +
+    "ifnull(DATE_FORMAT(btfechahoraterrondadet,'%d/%m/%Y %H:%i:%s'),'') fechahoraultterdet," +
+    "ifnull(btusuariorondas,'') ultusuario FROM bstntrn.btcampanas WHERE bstnCanalId in ('OBD','WCAL','CALL');";
 
+
+module.exports.getduracioncampanaprimronda = "select ifnull(SEC_TO_TIME(TIMESTAMPDIFF(second,btfechahoraprimronda,now())), '')" +
+    " duracion, btcampanaid ID from bstntrn.btcampanas WHERE bstnCanalId in ('OBD','WCAL','CALL') and btcampanaid=? ;";
+
+module.exports.getduracioncampanasegronda = "select ifnull(SEC_TO_TIME(TIMESTAMPDIFF(second,btfechahorasegronda,now())), '')" +
+    " duracion, btcampanaid ID from bstntrn.btcampanas WHERE bstnCanalId in ('OBD','WCAL','CALL') and btcampanaid=? ;";
+
+module.exports.getduracioncampanaterronda = "select ifnull(SEC_TO_TIME(TIMESTAMPDIFF(second,btfechahoraterronda,now())), '')" +
+    " duracion, btcampanaid ID from bstntrn.btcampanas WHERE bstnCanalId in ('OBD','WCAL','CALL') and btcampanaid=? ;";
+
+module.exports.getrellamarid = "SELECT A.btContactoConsecutivo id" +
+    "FROM bstntrn.btcontacto AS A" +
+    "INNER JOIN btcampanas AS B on A.btContactoCmpId = B.btcampanaid" +
+    "inner join bstntrn.btcontactotip tipi on (tipi.btcontactotipclienteid=A.btContactoConsecutivo)" +
+    "inner join bstntrn.sptllamtip tipest on (tipi.btcontactotip2 = tipest.sptllamtipid)" +
+    "inner join bstntrn.sptestatusllam con on (tipest.sptestatusllam = con.sptestatusllam)" +
+    "WHERE btContactoCmpId like  CONCAT('%',3084,'%') and tipi.btcontactotip2= 18 and bstnCanalId = 'OBD' ORDER BY tipi.btcontactotipid DESC limit 1;";
 
 //ConsultaSupervisores
 module.exports.consultarSupervisores = "SELECT btsupervisoidn ID, btsupervisonoml DSC FROM bstntrn.btsupervisor  where btsupervisonomp = ? ";

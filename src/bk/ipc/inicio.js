@@ -25,6 +25,10 @@ ipcMain.on('getAllCampanas', async(event, dato) => {
     event.reply("getAllCampanasResult", allCampanas);
 });
 
+ipcMain.on('getduracioncampana', async(event, dato, campo) => {
+    const duracion = await helper.getduracioncampana(dato, campo);
+    event.reply('getduracioncampanaResult', duracion);
+});
 
 ipcMain.on('consultarSupervisores', async(event, usuarioid) => {
     const supervisores = await helper.consultarSupervisores(usuarioid);
@@ -114,12 +118,21 @@ ipcMain.on('getindicadoresOut', async(event, campana) => {
 
 // guarda las rondas de llamadas
 ipcMain.on('lnzaRondaCampana', async(event, campana, arrancar_llamadas, numeroRonda, supervisor) => {
-    console.log("ipc ronda");
-    const indicadores = await helper.lnzaRondaCampana(campana, arrancar_llamadas, numeroRonda, supervisor)
-        //event.reply('getindicadoresOutResult', indicadores)
+    console.log("lanzar rondas");
+    await helper.lnzaRondaCampana(campana, arrancar_llamadas, numeroRonda, supervisor);
+    if (arrancar_llamadas === "NO") {
+        await helper.lnzaRondaCampana(campana, arrancar_llamadas, 02, supervisor);
+        await helper.lnzaRondaCampana(campana, arrancar_llamadas, 03, supervisor);
+    }
+    //event.reply('getindicadoresOutResult', indicadores)
 });
 
 //lanza las rondas de llamadas
 ipcMain.on('consultarAgente', async(event, campana, arrancar_llamadas, numeroRonda) => {
-    const consultarAgnt = await helper.consultarAgente(campana, arrancar_llamadas, numeroRonda)
+    await helper.reLlamar(campana);
+    await helper.consultarAgente(campana, arrancar_llamadas, numeroRonda)
+    if (arrancar_llamadas === "NO") {
+        await helper.consultarAgente(campana, arrancar_llamadas, 02)
+        await helper.consultarAgente(campana, arrancar_llamadas, 03)
+    }
 });
