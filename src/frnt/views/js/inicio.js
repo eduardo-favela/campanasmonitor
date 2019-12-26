@@ -149,15 +149,12 @@ ipcRenderer.on('getAllCampanasResult', async(event, datos) => {
                 campanas.push(datos[b]);
             }
         }
-        /*  console.log(campanasejec);
-         console.log(campanas); */
         if (!ispaused) {
             llenarcampanas(campanas);
         }
         llenarcampanasejec(campanasejec);
         if (campanasejec.length > 0) {
             for (let i = 0; i < campanasejec.length; i++) {
-                ipcRenderer.send("lnzaRondaCampana", campanasejec[i].ID, "SI", "01", supervisor_firma);
                 ipcRenderer.send('consultarAgente', campanasejec[i].ID, "SI", "01");
             }
         }

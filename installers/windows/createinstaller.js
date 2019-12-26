@@ -14,12 +14,12 @@ function getInstallerConfig() {
     const outPath = path.join(rootPath, 'release-builds')
 
     return Promise.resolve({
-        appDirectory: path.join(outPath, 'MonitorCampanas-win32-ia32/'),
+        appDirectory: path.join(outPath, 'EjecucionCampanas-win32-ia32/'),
         authors: 'Spartacus inc',
         noMsi: true,
         outputDirectory: path.join(outPath, 'windows-installer'),
-        exe: 'MonitorCampanas.exe',
-        setupExe: 'MonitorCampanasInstaller.exe',
+        exe: 'EjecucionCampanas.exe',
+        setupExe: 'EjecucionCampanasInstaller.exe',
         setupIcon: path.join(rootPath, 'assets', 'icons', 'favi.ico')
     })
 }

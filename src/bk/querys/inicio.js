@@ -25,13 +25,12 @@ module.exports.getduracioncampanasegronda = "select ifnull(SEC_TO_TIME(TIMESTAMP
 module.exports.getduracioncampanaterronda = "select ifnull(SEC_TO_TIME(TIMESTAMPDIFF(second,btfechahoraterronda,now())), '')" +
     " duracion, btcampanaid ID from bstntrn.btcampanas WHERE bstnCanalId in ('OBD','WCAL','CALL') and btcampanaid=? ;";
 
-module.exports.getrellamarid = "SELECT A.btContactoConsecutivo id" +
-    "FROM bstntrn.btcontacto AS A" +
-    "INNER JOIN btcampanas AS B on A.btContactoCmpId = B.btcampanaid" +
-    "inner join bstntrn.btcontactotip tipi on (tipi.btcontactotipclienteid=A.btContactoConsecutivo)" +
-    "inner join bstntrn.sptllamtip tipest on (tipi.btcontactotip2 = tipest.sptllamtipid)" +
-    "inner join bstntrn.sptestatusllam con on (tipest.sptestatusllam = con.sptestatusllam)" +
-    "WHERE btContactoCmpId like  CONCAT('%',3084,'%') and tipi.btcontactotip2= 18 and bstnCanalId = 'OBD' ORDER BY tipi.btcontactotipid DESC limit 1;";
+module.exports.getrellamar = "UPDATE bstntrn.btcontacto SET btContactoSts = 'PENDIENTE'  WHERE btContactoCmpId=? and btContactoConsecutivo in (SELECT idcontacto from " +
+    "(SELECT btContactoConsecutivo idcontacto, btContactoCmpId idcampana, " +
+    "(SELECT btcontactotip2 FROM bstntrn.btcontactotip where btcontactotipclienteid = btContactoConsecutivo and btcontactotipcamp = btContactoCmpId order by btcontactotipid desc limit 1 ) as tipificacion2, " +
+    "(SELECT btcontactotip1 FROM bstntrn.btcontactotip where btcontactotipclienteid = btContactoConsecutivo and btcontactotipcamp = btContactoCmpId order by btcontactotipid desc limit 1) as tipificacion1, " +
+    "(SELECT btcontactotipid FROM bstntrn.btcontactotip where btcontactotipclienteid = btContactoConsecutivo and btcontactotipcamp = btContactoCmpId order by btcontactotipid desc limit 1) as idtipi " +
+    "from bstntrn.btcontacto where btContactoCmpId = ?) as i where i.tipificacion2 in ('3','5','6','9','11','13','14','16',18));";
 
 //ConsultaSupervisores
 module.exports.consultarSupervisores = "SELECT btsupervisoidn ID, btsupervisonoml DSC FROM bstntrn.btsupervisor  where btsupervisonomp = ? ";
