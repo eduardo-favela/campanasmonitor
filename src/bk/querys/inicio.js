@@ -6,18 +6,45 @@ module.exports.consultarAgentesOut = "SELECT btAgenteOutId id,btAgenteOutNombre 
 
 module.exports.getAllCampanas = "SELECT btcampanaid ID, CONCAT(btcampanaid, '-', btcampanadescripcion) DSC, btcampanauniverso UNI FROM bstntrn.btcampanas where bstnCanalId = 'IBD' ";
 
-module.exports.getAllCampanasOut = " SELECT btcampanaid ID,Concat(btcampanaid,'-',btcampanadescripcion) DSC,btcampanauniverso UNI, " +
-    "ifnull(DATE_FORMAT(btfechahoraprimronda,'%d/%m/%Y %H:%i:%s'),'') fechahoraultprim," +
+module.exports.getAllCampanasOut = " SELECT btcampanas.btcampanaid ID,Concat(btcampanas.btcampanaid,'-',btcampanadescripcion) DSC,btcampanauniverso UNI, " +
+    "ifnull(DATE_FORMAT(btfechahoraprimronda,'%d/%m/%Y %H:%i:%s'),'') fechahoraultprim, " +
     "ifnull(DATE_FORMAT(btfechahoraprimrondadet,'%d/%m/%Y %H:%i:%s'),'') fechahoraultprimdet, " +
-    "ifnull(DATE_FORMAT(btfechahorasegronda,'%d/%m/%Y %H:%i:%s'),'') fechahoraultseg," +
-    "ifnull(DATE_FORMAT(btfechahorasegrondadet,'%d/%m/%Y %H:%i:%s'),'') fechahoraultsegdet," +
-    "ifnull(DATE_FORMAT(btfechahoraterronda,'%d/%m/%Y %H:%i:%s'),'') fechahoraultter," +
-    "ifnull(DATE_FORMAT(btfechahoraterrondadet,'%d/%m/%Y %H:%i:%s'),'') fechahoraultterdet," +
-    "ifnull(btusuariorondas,'') ultusuario FROM bstntrn.btcampanas WHERE bstnCanalId in ('OBD','WCAL','CALL');";
+    "ifnull(DATE_FORMAT(btfechahorasegronda,'%d/%m/%Y %H:%i:%s'),'') fechahoraultseg, " +
+    "ifnull(DATE_FORMAT(btfechahorasegrondadet,'%d/%m/%Y %H:%i:%s'),'') fechahoraultsegdet, " +
+    "ifnull(DATE_FORMAT(btfechahoraterronda,'%d/%m/%Y %H:%i:%s'),'') fechahoraultter, " +
+    "ifnull(DATE_FORMAT(btfechahoraterrondadet,'%d/%m/%Y %H:%i:%s'),'') fechahoraultterdet, " +
+    "ifnull(btusuariorondas,'') ultusuario, " +
+    "ifnull(bstnCanalId,'') canal " +
+    "FROM bstntrn.btcampanas " +
+    "LEFT JOIN bstntrn.btsupervisordet as a on a.btcampanaid=btcampanas.btcampanaid " +
+    "LEFT JOIN bstntrn.btsupervisor on a.btsupervisoidn=btsupervisor.btsupervisoidn " +
+    "WHERE bstnCanalId in ('OBD','WCAL','CALL') and btsupervisor.btsupervisonomp= ?;";
 
+
+module.exports.getcmpcallback = "SELECT btcampanas.btcampanaid FROM bstntrn.btcampanas WHERE bstnCanalId in ('WCAL','CALL');";
+
+
+module.exports.getstatcmplnz = "SELECT btcampanaid ID,Concat(btcampanaid,'-',btcampanadescripcion) DSC,btcampanauniverso UNI, " +
+    "ifnull(DATE_FORMAT(btfechahoraprimronda,'%d/%m/%Y %H:%i:%s'),'') fechahoraultprim, " +
+    "ifnull(DATE_FORMAT(btfechahoraprimrondadet,'%d/%m/%Y %H:%i:%s'),'') fechahoraultprimdet, " +
+    "ifnull(DATE_FORMAT(btfechahorasegronda,'%d/%m/%Y %H:%i:%s'),'') fechahoraultseg, " +
+    "ifnull(DATE_FORMAT(btfechahorasegrondadet,'%d/%m/%Y %H:%i:%s'),'') fechahoraultsegdet, " +
+    "ifnull(DATE_FORMAT(btfechahoraterronda,'%d/%m/%Y %H:%i:%s'),'') fechahoraultter, " +
+    "ifnull(DATE_FORMAT(btfechahoraterrondadet,'%d/%m/%Y %H:%i:%s'),'') fechahoraultterdet, " +
+    "ifnull(btusuariorondas,'') ultusuario FROM bstntrn.btcampanas WHERE btcampanaid = ?;";
+
+module.exports.updatecontcallback = "UPDATE bstntrn.btcontacto SET btcontactosts = 'CANCELADO' where btcontactofecha is not null AND DATE_FORMAT(btcontactofecha,'%Y-%m-%d')=(SELECT (DATE(NOW()) - INTERVAL 1 DAY)) and btcontactosts = 'PENDIENTE';";
+
+module.exports.getnocontactoscmp = "select count(btContactoConsecutivo) nocontactos, ifnull(btcampanaid, ?) ID FROM bstntrn.btcontacto " +
+    "inner join bstntrn.btcampanas on btcontacto.btContactoCmpId=btcampanas.btcampanaid " +
+    "where btcampanaid= ? and btContactoSts in('ASIGNADA','ATENDIDA', 'CANCELADO') and bstnCanalId in ('OBD','WCAL','CALL');";
+
+module.exports.getnocontactosasign = "select count(btContactoConsecutivo) nocontactos, ifnull(btcampanaid,?) ID FROM bstntrn.btcontacto " +
+    "inner join bstntrn.btcampanas on btcontacto.btContactoCmpId=btcampanas.btcampanaid " +
+    "where btcampanaid=? and bstnCanalId in ('OBD','WCAL','CALL');";
 
 module.exports.getduracioncampanaprimronda = "select ifnull(SEC_TO_TIME(TIMESTAMPDIFF(second,btfechahoraprimronda,now())), '')" +
-    " duracion, btcampanaid ID from bstntrn.btcampanas WHERE bstnCanalId in ('OBD','WCAL','CALL') and btcampanaid=? ;";
+    " duracion from bstntrn.btcampanas WHERE bstnCanalId in ('OBD','WCAL','CALL') and btcampanaid=? ;";
 
 module.exports.getduracioncampanasegronda = "select ifnull(SEC_TO_TIME(TIMESTAMPDIFF(second,btfechahorasegronda,now())), '')" +
     " duracion, btcampanaid ID from bstntrn.btcampanas WHERE bstnCanalId in ('OBD','WCAL','CALL') and btcampanaid=? ;";
@@ -26,11 +53,23 @@ module.exports.getduracioncampanaterronda = "select ifnull(SEC_TO_TIME(TIMESTAMP
     " duracion, btcampanaid ID from bstntrn.btcampanas WHERE bstnCanalId in ('OBD','WCAL','CALL') and btcampanaid=? ;";
 
 module.exports.getrellamar = "UPDATE bstntrn.btcontacto SET btContactoSts = 'PENDIENTE'  WHERE btContactoCmpId=? and btContactoConsecutivo in (SELECT idcontacto from " +
-    "(SELECT btContactoConsecutivo idcontacto, btContactoCmpId idcampana, " +
+    "(SELECT btContactoConsecutivo idcontacto, btContactoCmpId idcampana, btContactoSts stat," +
     "(SELECT btcontactotip2 FROM bstntrn.btcontactotip where btcontactotipclienteid = btContactoConsecutivo and btcontactotipcamp = btContactoCmpId order by btcontactotipid desc limit 1 ) as tipificacion2, " +
     "(SELECT btcontactotip1 FROM bstntrn.btcontactotip where btcontactotipclienteid = btContactoConsecutivo and btcontactotipcamp = btContactoCmpId order by btcontactotipid desc limit 1) as tipificacion1, " +
     "(SELECT btcontactotipid FROM bstntrn.btcontactotip where btcontactotipclienteid = btContactoConsecutivo and btcontactotipcamp = btContactoCmpId order by btcontactotipid desc limit 1) as idtipi " +
-    "from bstntrn.btcontacto where btContactoCmpId = ?) as i where i.tipificacion2 in ('3','5','6','9','11','13','14','16',18));";
+    "from bstntrn.btcontacto where btContactoCmpId = ?) as i where i.tipificacion2 in (SELECT ifnull(sptllamtipid,'0') statip FROM bstntrn.sptllamtip where sptllamtip.sptremarcar=1) and i.stat <> 'CANCELADO');";
+
+
+module.exports.getrellamarcallbacks = "UPDATE bstntrn.btcontacto SET btContactoSts = 'PENDIENTE'  WHERE btContactoCmpId=? and btContactoConsecutivo in (SELECT idcontacto from " +
+    "(SELECT btContactoConsecutivo idcontacto, btContactoCmpId idcampana, btContactoSts stat, (btContactoCountTel01+btContactoCountTel02+btContactoCountTel03) countel, " +
+    "(SELECT btcontactotip2 FROM bstntrn.btcontactotip where btcontactotipclienteid = btContactoConsecutivo and btcontactotipcamp = btContactoCmpId order by btcontactotipid desc limit 1 ) as tipificacion2, " +
+    "(SELECT btcontactotip1 FROM bstntrn.btcontactotip where btcontactotipclienteid = btContactoConsecutivo and btcontactotipcamp = btContactoCmpId order by btcontactotipid desc limit 1) as tipificacion1, " +
+    "(SELECT btcontactotipid FROM bstntrn.btcontactotip where btcontactotipclienteid = btContactoConsecutivo and btcontactotipcamp = btContactoCmpId order by btcontactotipid desc limit 1) as idtipi " +
+    "from bstntrn.btcontacto where btContactoCmpId = ?) as i where i.tipificacion2 in (SELECT ifnull(sptllamtipid,'0') statip FROM bstntrn.sptllamtip where sptllamtip.sptremarcar=1) and i.stat <> 'CANCELADO' and i.countel<3);";
+
+
+module.exports.getuniverso = "SELECT count(*) universo FROM bstntrn.btcontacto inner join bstntrn.btcampanas on btcontacto.btContactoCmpId=btcampanas.btcampanaid where btcontactocmpid =? and bstnCanalId=?;";
+
 
 //ConsultaSupervisores
 module.exports.consultarSupervisores = "SELECT btsupervisoidn ID, btsupervisonoml DSC FROM bstntrn.btsupervisor  where btsupervisonomp = ? ";

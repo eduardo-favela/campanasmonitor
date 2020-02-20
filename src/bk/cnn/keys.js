@@ -1,70 +1,44 @@
+const Cryptr = require('cryptr');
+const cryptr = new Cryptr('bsw2019');
+const fs = require('fs');
+
 module.exports = {
     database: leerConexion(),
-    databaseMarcador: leerConexionMarcador(),
-    databasep: leerConexionp(),
-    databaseMarcadorp: leerConexionMarcadorp()
+    databaseMarcador: leerConexionMarcador()
 };
 
 function leerConexion() {
-    const editJsonFile = require("edit-json-file");
-    let file = editJsonFile(`${__dirname}/conexion.json`);
+    let cnn2020 = fs.readFileSync('cnn2020.json');
+    let conf = JSON.parse(cnn2020);
+    const decryptedString = cryptr.decrypt(conf.conexiones);
+    var configuraciones = JSON.parse(decryptedString);
+    var conexiones = configuraciones.conexiones;
+    var selected = conexiones.filter(conexion => conexion.select)[0];
     var coneObj = {
-        host: file.toObject().crm.ip,
-        user: file.toObject().crm.usuario,
-        password: file.toObject().crm.contrasena,
-        database: file.toObject().crm.baseDatos,
-        connectionLimit: 1000,
-        connectTimeout: 60 * 10 * 1000,
-        acquireTimeout: 60 * 10 * 1000,
-        timeout: 60 * 10 * 1000,
+        host: selected.mysql.crm.ip,
+        user: selected.mysql.crm.usuario,
+        password: selected.mysql.crm.contrasena,
+        database: selected.mysql.crm.baseDatos,
+        connectionLimit: 10
     };
+
     return coneObj;
 }
 
 function leerConexionMarcador() {
-    const editJsonFile = require("edit-json-file");
-    let file = editJsonFile(`${__dirname}/conexion.json`);
+    let cnn2020 = fs.readFileSync('cnn2020.json');
+    let conf = JSON.parse(cnn2020);
+    const decryptedString = cryptr.decrypt(conf.conexiones);
+    var configuraciones = JSON.parse(decryptedString);
+    var conexiones = configuraciones.conexiones;
+    var selected = conexiones.filter(conexion => conexion.select)[0];
     var coneObj = {
-        host: file.toObject().marcador.ip,
-        user: file.toObject().marcador.usuario,
-        password: file.toObject().marcador.contrasena,
-        database: file.toObject().marcador.baseDatos,
-        connectionLimit: 1000,
-        connectTimeout: 60 * 10 * 1000,
-        acquireTimeout: 60 * 10 * 1000,
-        timeout: 60 * 10 * 1000,
+        host: selected.mysql.cc.ip,
+        user: selected.mysql.cc.usuario,
+        password: selected.mysql.cc.contrasena,
+        database: selected.mysql.cc.baseDatos,
+        connectionLimit: 10
     };
-    return coneObj;
-}
 
-function leerConexionp() {
-    const editJsonFile = require("edit-json-file");
-    let file = editJsonFile(`${__dirname}/conexion_.json`);
-    var coneObj = {
-        host: file.toObject().crm.ip,
-        user: file.toObject().crm.usuario,
-        password: file.toObject().crm.contrasena,
-        database: file.toObject().crm.baseDatos,
-        connectionLimit: 1000,
-        connectTimeout: 60 * 10 * 1000,
-        acquireTimeout: 60 * 10 * 1000,
-        timeout: 60 * 10 * 1000,
-    };
-    return coneObj;
-}
-
-function leerConexionMarcadorp() {
-    const editJsonFile = require("edit-json-file");
-    let file = editJsonFile(`${__dirname}/conexion_.json`);
-    var coneObj = {
-        host: file.toObject().marcador.ip,
-        user: file.toObject().marcador.usuario,
-        password: file.toObject().marcador.contrasena,
-        database: file.toObject().marcador.baseDatos,
-        connectionLimit: 1000,
-        connectTimeout: 60 * 10 * 1000,
-        acquireTimeout: 60 * 10 * 1000,
-        timeout: 60 * 10 * 1000,
-    };
     return coneObj;
 }

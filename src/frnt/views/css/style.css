@@ -1,18 +1,3 @@
-body {
-    background-image: url(../img/fondo.png);
-    background-size: 100% 100%;
-}
-
-#divOpen {
-    background-image: url(../img/spc.png);
-    background-size: 100% 100%;
-}
-
-#displayTipificacion {
-    background-image: url(../img/spc.png);
-    background-size: 100% 100%;
-}
-
 .circulo_estatus {
     width: 20px;
     height: 20px;

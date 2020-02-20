@@ -9,31 +9,23 @@ require('datatables.net-responsive-dt')();
 var nodos = [];
 var nodosRaiz = [];
 var usuarioOk = {};
-var time = 5000;
-var procesoID;
-var supervisor_firm;
 var supervisor_firma;
-var arrancar_llamadas = "NO";
-var numeroRonda = "01";
-var segundos = 0;
-var minutos = 0;
-var horas = 0;
-var centesimas = 0;
-var bandera = 0;
-var cronoval = 0;
 var campanas = [];
 var campanasejec = [];
 var ispaused = false;
+var cmpejecpaused = false;
+var time = 5000;
 
 ipcRenderer.send('conexion', '')
 ipcRenderer.send('getUsuario', '')
 ipcRenderer.send('getAllCampanas', '')
+    /* ipcRenderer.send('updatecontcallback', '') */
 setInterval(function() {
-    ipcRenderer.send('getAllCampanas', '')
-}, 5000);
+    ipcRenderer.send('getAllCampanas', supervisor_firma);
+}, time);
 
 ipcRenderer.on('errorconexion', (event, data) => {
-    alert("error ", data);
+    mostrarMensaje("", "Ocurrió un error de conexión");
 })
 
 function onLoad() {
@@ -61,14 +53,13 @@ ipcRenderer.on('getUsuarioResult', (event, datos) => {
     ipcRenderer.send('consultarSupervisores', datos.usuario.usuarioid)
     $("#usuario").html(datos.usuario.usuarioid);
     ipcRenderer.send('getUsuarioModulos', datos.usuario.usuarioid)
-
-})
+});
 
 //consultar supervisores
 ipcRenderer.on('consultarSupervisoresResult', (event, datos) => {
-    console.log(datos);
     supervisor_firm = datos[0].ID;
-})
+
+});
 
 //consultar agentes
 
@@ -92,7 +83,7 @@ ipcRenderer.on('getUsuarioModulosResult', (event, datos) => {
     area.RPFARESID = datos.AREAS[0].RPFARESID;
     area.RPFLINEA = datos.AREAS[0].RPFLINEA;
     ipcRenderer.send('getModulosArea', area)
-})
+});
 
 //llena el select #comboModulos con los modulos que le corresponden al usuario
 ipcRenderer.on('getModulosAreaResult', (event, datos) => {
@@ -102,7 +93,7 @@ ipcRenderer.on('getModulosAreaResult', (event, datos) => {
     });
     var objModulo = { CNESMNID: datos[0].CNESMNID, RPFLINEA: datos[0].RPFLINEA };
     ipcRenderer.send('getArbol', objModulo)
-})
+});
 
 //recibe el valor del #comboModulos y lo envia al ipc/Modulos
 function cambioModulo() {
@@ -117,33 +108,25 @@ ipcRenderer.on('getArbolResult', async(event, datos) => {
     await normalizaNodos(datos);
     await generanodosRaiz();
     await dibujarBtnsCont()
-})
+});
 
-ipcRenderer.on('getduracioncampanaResult', async(event, datos) => {
-    /*  console.log(datos.duracion); */
-    let selectlabel = 'duracioncmp' + datos.ID;
-    if (datos.duracion !== '') {
-        $('#' + selectlabel).html(datos.duracion);
-    } else {
-        $('#' + selectlabel).html('');
+
+ipcRenderer.on('lanzaRondaCampanaResult', async(event, resp) => {
+    if (resp.result) {
+        cmpejecpaused = false;
+        ispaused = false;
+
     }
-})
+});
 
-//llena combo de campañas
+
 ipcRenderer.on('getAllCampanasResult', async(event, datos) => {
-    /*  console.log(datos); */
     if (datos.length > 0) {
         campanas = [];
         campanasejec = [];
         for (let b = 0; b < datos.length; b++) {
-            if (datos[b].fechahoraultprim !== '' && datos[b].fechahoraultprimdet === '') {
-                ipcRenderer.send('getduracioncampana', datos[b].ID, 'btfechahoraprimronda');
-                campanasejec.push(datos[b]);
-            } else if (datos[b].fechahoraultseg !== '' && datos[b].fechahoraultsegdet === '') {
-                ipcRenderer.send('getduracioncampana', datos[b].ID, 'btfechahorasegronda');
-                campanasejec.push(datos[b]);
-            } else if (datos[b].fechahoraultter !== '' && datos[b].fechahoraultterdet === '') {
-                ipcRenderer.send('getduracioncampana', datos[b].ID, 'btfechahoraterronda');
+            if (datos[b].ronda === "01" || datos[b].ronda === "02" || datos[b].ronda === "03") {
+                ipcRenderer.send('consultarAgente', datos[b].ID, "SI", datos[b].ronda, "NO", datos[b].canal);
                 campanasejec.push(datos[b]);
             } else {
                 campanas.push(datos[b]);
@@ -152,11 +135,8 @@ ipcRenderer.on('getAllCampanasResult', async(event, datos) => {
         if (!ispaused) {
             llenarcampanas(campanas);
         }
-        llenarcampanasejec(campanasejec);
-        if (campanasejec.length > 0) {
-            for (let i = 0; i < campanasejec.length; i++) {
-                ipcRenderer.send('consultarAgente', campanasejec[i].ID, "SI", "01");
-            }
+        if (!cmpejecpaused) {
+            llenarcampanasejec(campanasejec);
         }
     } else {
         tablavacia();
@@ -332,13 +312,12 @@ function modulosToggle() {
 }
 
 function cerrarSesion() {
-    if (arrancar_llamadas == "SI") {
-        mostrarMensaje('', "Deten la ronda de llamadas que esta en progreso para poder salir")
-    } else {
-        ipcRenderer.send('cerrarSesion_', "")
-    }
-
-
+    /*     if (arrancar_llamadas == "SI") {
+            mostrarMensaje('', "Deten la ronda de llamadas que esta en progreso para poder salir")
+        } else {
+            ipcRenderer.send('cerrarSesion_', "")
+        } */
+    ipcRenderer.send('cerrarSesion_', "");
 }
 
 ipcRenderer.on('cerrarSesionAgtResult', (datos) => {
@@ -396,13 +375,26 @@ function llenarcampanasejec(datos) {
         let idcampana = modulo.ID.toString();
         let dscCampana = modulo.DSC.toString();
         let universo = modulo.UNI.toString();
+        let sigronda = '';
+        let comple = '';
+        /* campanasejecaux.length > 0 && campanasejecaux != undefined */
+        if (modulo.status) {
+            if (modulo.ronda !== "03") {
+                sigronda = '<button class="btn ml-3 py-auto" id="btnlnzsig' + idcampana + '" onclick="lanzarsigronda(btnlnzsig' + idcampana + ')" ' +
+                    'style="height: fit-content; width: fit-content; margin-bottom:0.5rem" enabled:true; title="Campaña lista para lanzar siguiente ronda de llamadas.">' +
+                    '<i id="btnsig' + idcampana + '" class="icon-play3" style="color: #ffff; font-size: 15px;"></i></button>';
+            }
+            comple = '¡Completada!';
+        }
         $("#campanasactivas").append('<li class="list-group-item d-flex col-12 justify-content-between" id="IndicadoresCol">' +
             '<div class="float-left col-10 my-auto" style="text-align: initial; color:#fff;"><label style="font-size:x-large;" title="Nombre de la campaña.">' +
-            '<b>' + dscCampana + '</b></label> <br>' +
+            '<b>' + dscCampana + '</b></label>' + sigronda + '<br>' +
             '<label class="my-auto py-auto" title="Número de contactos de la campaña.">Universo: ' + universo + '</label>' +
             '<label class="ml-3 py-auto" title="Último usuario que lanzó la campaña.">Usuario: ' + modulo.ultusuario + '</label>' +
             '<label class="ml-3 py-auto" title="Fecha y hora de la última vez que fue lanzada la campaña.">Fecha: ' + modulo.fechahoraultprim.toString() + '</label>' +
-            '<label class="ml-3 py-auto" title="Duración de la campaña desde que fue lanzada.">Duración: <label id="duracioncmp' + idcampana + '"></label></label>' +
+            '<label class="ml-3 py-auto" title="Ronda en que está corriendo la campaña." style="font-size: 20px;">Ronda: <label style="font-size: 20px;" id="ronda' + idcampana + '"><b>' + modulo.ronda + '</b></label></label>' +
+            '<label class="ml-3 py-auto" style="font-size: 20px; margin-bottom:0.5rem;" title="Ronda de la campaña completada"><b id="rndcomplete' + idcampana + '">' + comple + '</b></label> <br>' +
+            '<label class="my-auto py-auto" title="Duración de la campaña desde que fue lanzada.">Duración: <label id="duracioncmp' + idcampana + '">' + modulo.duracion + '</label></label>' +
             '</div>' +
             '<div class="float-right my-auto style="text-align:right;">' +
             '<button class="btn my-auto" id="playcampana" onclick="detenerRonda(\'detenercmp' + idcampana + '\', playobd' + idcampana + ')"' +
@@ -415,6 +407,25 @@ function llenarcampanasejec(datos) {
             '</li>');
     });
     tablavacia();
+}
+
+
+function lanzarsigronda(btn) {
+    let ronda = "";
+    let idcampana = "";
+    let canal = "";
+    let row = btn.parentNode;
+    row.removeChild(row.childNodes[7]);
+    row.removeChild(btn);
+    for (var i = 0; i < campanasejec.length; i++) {
+        if (campanasejec[i].ID === btn.id.replace("btnlnzsig", "")) {
+            ronda = campanasejec[i].ronda;
+            idcampana = campanasejec[i].ID;
+            canal = campanasejec[i].canal;
+        }
+    }
+    stCmp(idcampana, "SI_NO", ronda, canal);
+    stRonda(idcampana, "SI_NO", ronda, canal);
 }
 
 function llenarcampanas(datos) {
@@ -490,22 +501,26 @@ function mostraragentescmp(datos) {
 }
 
 function lnzRonda(campana, idelement) {
-    cronoval = 1;
-    bandera = 0;
-    numeroRonda = "01";
-    arrancar_llamadas = "SI"
+    ispaused = true;
+    cmpejecpaused = true;
+    time = 0;
+    let numeroRonda = "01";
+    let arrancar_llamadas = "SI"
     let camp = campana.replace('lanzarcmp', '');
     var row = idelement.parentNode.parentNode.parentNode;
     row.parentNode.removeChild(row);
-    let cmp = row.childNodes[0].childNodes[0].data;
+    let cmp = row.childNodes[0].childNodes[0].textContent;
+    let canal = "";
     for (var i = 0; i < campanas.length; i++) {
         if (campanas[i].DSC === cmp) {
             campanasejec.push(campanas[i]);
+            canal = campanas[i].canal;
             campanas.splice(i, 1);
         }
     }
-    row.childNodes[1].childNodes[0].setAttribute("onClick", "detenerRonda(detenercmp" + campana + ", " + idelement.id + ")");
+    /* row.childNodes[1].childNodes[0].setAttribute("onClick", "detenerRonda(detenercmp" + campana + ", " + idelement.id + ")"); */
     row.childNodes[1].childNodes[0].setAttribute("title", "Detener llamadas de la campaña.");
+    /* row.childNodes[1].childNodes[0].setAttribute("enabled", "false"); */
     row.childNodes[1].childNodes[0].childNodes[0].className = "icon-stop2";
     row.childNodes[1].childNodes[0].childNodes[0].style = "color: red; font-size: 15px;";
     if ($('#campanasactivas').find('li.vacia').length != 0) {
@@ -513,27 +528,69 @@ function lnzRonda(campana, idelement) {
     }
     $("#campanasactivas").append(row);
     tablavacia();
-    ipcRenderer.send("lnzaRondaCampana", camp, arrancar_llamadas, numeroRonda, supervisor_firma);
-    ipcRenderer.send('consultarAgente', camp, arrancar_llamadas, numeroRonda); //consulta los agentes para lanzar las llamadas en rondas de llamada
+    stCmp(camp, arrancar_llamadas, numeroRonda, canal);
+    stRonda(camp, arrancar_llamadas, numeroRonda, canal);
 }
 
-function detenerRonda(campana, idelement) {
-    cronoval = 1;
-    bandera = 1;
-    numeroRonda = "01";
+function stRonda(camp, arrancar_llamadas, rondaActual, canal) {
+    ipcRenderer.send('consultarAgente', camp, arrancar_llamadas, rondaActual, arrancar_llamadas, canal); //consulta los agentes para lanzar las llamadas en rondas de llamada
+}
+
+function stCmp(camp, arrancar_llamadas, numeroRonda, canal) {
+    ipcRenderer.send("lnzaRondaCampana", camp, arrancar_llamadas, numeroRonda, supervisor_firma, canal);
+}
+
+
+function mostrarMensaje(titulo, mensaje) {
+    if (mensaje == "Ocurrió un error de conexión") {
+        if ($('#alert_principal').hasClass('alert-success')) {
+            $('#alert_principal').removeClass('alert-success');
+        }
+        $('#alert_principal').addClass('alert-danger');
+    } else {
+        if ($('#alert_principal').hasClass('alert-danger')) {
+            $('#alert_principal').removeClass('alert-danger');
+        }
+        $('#alert_principal').addClass('alert-success');
+    }
+    $('#alert_principal').text(mensaje);
+    $('#alert_principal').show();
+    setTimeout(() => {
+        $('#alert_principal').hide(2000);
+    }, 3000);
+}
+
+
+
+function detenerRonda(campana, idelemento) {
+    ispaused = true;
+    cmpejecpaused = true;
+    time = 0;
+    let tipoval = (typeof idelemento);
+    let idelement = {};
+    if (tipoval === "string") {
+        idelement = $("#" + idelemento)[0];
+    } else {
+        idelement = idelemento;
+    }
+    let rondaActual = "";
     let camp = campana.replace('detenercmp', '');
-    arrancar_llamadas = "NO"
+    let arrancar_llamadas = "NO"
     var row = idelement.parentNode.parentNode.parentNode;
     row.parentNode.removeChild(row);
-    let cmp = row.childNodes[0].childNodes[0].data;
+    let cmp = row.childNodes[0].childNodes[0].textContent;
+    let canal = "";
     for (var i = 0; i < campanasejec.length; i++) {
         if (campanasejec[i].DSC === cmp) {
             campanas.push(campanasejec[i]);
+            rondaActual = campanasejec[i].ronda;
+            canal = campanasejec[i].canal;
             campanasejec.splice(i, 1);
         }
     }
-    row.childNodes[1].childNodes[0].setAttribute("onClick", "lnzRonda(lanzarcmp" + campana + ", " + idelement.id + ")");
+    /* row.childNodes[1].childNodes[0].setAttribute("onClick", "lnzRonda(lanzarcmp" + campana + ", " + idelement.id + ")"); */
     row.childNodes[1].childNodes[0].setAttribute("title", "Lanzar llamadas de la campaña.");
+    /* row.childNodes[1].childNodes[0].setAttribute("enabled", "false"); */
     row.childNodes[1].childNodes[0].childNodes[0].className = "icon-play3";
     row.childNodes[1].childNodes[0].childNodes[0].style = "color: #ffff; font-size: 15px;";
     if ($('#allcampanas').find('li.vacia').length != 0) {
@@ -541,10 +598,9 @@ function detenerRonda(campana, idelement) {
     }
     $("#allcampanas").append(row);
     tablavacia();
-    ipcRenderer.send("lnzaRondaCampana", camp, arrancar_llamadas, numeroRonda, supervisor_firma);
-    ipcRenderer.send('consultarAgente', camp, arrancar_llamadas, numeroRonda); //consulta los agentes para lanzar las llamadas en rondas de llamada
+    stRonda(camp, arrancar_llamadas, rondaActual, canal);
+    stCmp(camp, arrancar_llamadas, rondaActual, canal);
 }
-
 
 function cerrarVentana() {
 
@@ -554,63 +610,4 @@ function cerrarVentana() {
     $("#divOpen").hide();
     $("#webview").remove();
     $("#divMonitor").show();
-}
-
-
-function cronometro(id1, id2) {
-    if (bandera == 0) {
-        if (centesimas < 99) {
-            centesimas++;
-            if (centesimas < 10) {
-                centesimas = "0" + centesimas
-            }
-        }
-        if (centesimas == 99) {
-            centesimas = -1;
-        }
-        if (centesimas == 0) {
-            segundos++;
-            if (segundos < 10) {
-                segundos = "0" + segundos
-            }
-        }
-        if (segundos == 60) {
-            segundos = 0;
-        }
-        if ((centesimas == 0) && (segundos == 0)) {
-            minutos++;
-            if (minutos < 10) {
-                minutos = "0" + minutos
-            }
-        }
-        if (minutos == 60) {
-            minutos = 0;
-        }
-        if ((centesimas == 0) && (segundos == 0) && (minutos == 0)) {
-            horas++;
-            if (horas < 10) {
-                horas = "0" + horas
-            }
-        }
-        if (segundos == 0) {
-            segundos = "00";
-        }
-        if (minutos == 0) {
-            minutos = "00";
-        }
-        if (horas == 0) {
-            horas = "00";
-        }
-        if (cronoval == 1) {
-            //document.getElementById(id1).innerHTML = "Corriendo TIEMPO" + " " + minutos + ":" + segundos;
-        }
-    } else {
-        //document.getElementById(id2).innerHTML = "";
-        /* document.getElementById("lblcrono2").innerHTML="";
-        document.getElementById("lblcrono3").innerHTML=""; */
-        minutos = 0;
-        segundos = 0;
-        horas = 0;
-        centesimas = 0;
-    }
 }

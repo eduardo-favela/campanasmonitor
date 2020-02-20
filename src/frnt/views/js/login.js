@@ -4,16 +4,16 @@ const $ = require('jquery');
 
 
 // lee el valor del campo usuario en el log in y lo busca en la base de datos
-function consultarNombre(){
+function consultarNombre() {
 
-  if($("#inputUsuario").val() != ""){
+    if ($("#inputUsuario").val() != "") {
 
-    $(".loader").show()
-    $(".alert").remove();
-    ipcRenderer.send('consultarNombre',  $("#inputUsuario").val()) //envia la orden para realizar la consulta pasa el valor del input usuario como parametro
-    $("#nombreUsuario").html("")
+        $(".loader").show()
+        $(".alert").remove();
+        ipcRenderer.send('consultarNombre', $("#inputUsuario").val()) //envia la orden para realizar la consulta pasa el valor del input usuario como parametro
+        $("#nombreUsuario").html("")
 
-  }
+    }
 
 
 }
@@ -22,101 +22,104 @@ function consultarNombre(){
 ipcRenderer.on('consultarNombreResult', (event, usuario) => {
 
 
-    if(usuario != null){
+    if (usuario != null) {
 
-      $("#nombreUsuario").html( usuario.SSUSRDSC) //retorna el tipo de usuario (maestro, agente, etc...) y lo imprime en la vista del login
-     
-    }else{
+        $("#nombreUsuario").html(usuario.SSUSRDSC) //retorna el tipo de usuario (maestro, agente, etc...) y lo imprime en la vista del login
 
-      $(".alert").remove();
-      $("#inputUsuario").before(
-        
-        '<div class="alert alert-danger" role="alert" style="background: transparent; border: none;">'+
-        'Usuario no encontrado'+
-        '</div>'
-  
-      );
+    } else {
+
+        $(".alert").remove();
+        $("#inputUsuario").before(
+
+            '<div class="alert alert-danger" role="alert" style="background: transparent; border: none;">' +
+            'Usuario no encontrado' +
+            '</div>'
+
+        );
     }
     $(".loader").hide()
 
 
 })
 
-function cancelar(){
+function cancelar() {
 
     ipcRenderer.send('cerrarVentana', "")
 
 }
 //valida las credenciales del usuario
-function login(){
-
-  
-  let datos = {};
-  datos.usuarioid = $("#inputUsuario").val();
-  datos.pssw = $("#inputContrasena").val();
-
-  if(datos.usuarioid != ""){
-    $(".loader").show()
-    $("#btnLogin").hide()
-    ipcRenderer.send('validarUsuario', datos)
-  }
-
+function login() {
+    ipcRenderer.send('geturls');
 }
 
+
+ipcRenderer.on('geturlsresult', (event, urls) => {
+    let datos = {};
+    datos.usuarioid = $("#inputUsuario").val();
+    datos.pssw = $("#inputContrasena").val();
+    datos.url = urls.login;
+    if (datos.usuarioid != "") {
+        $(".loader").show()
+        $("#btnLogin").hide()
+        ipcRenderer.send('validarUsuario', datos)
+    }
+})
+
+
 var inputcontra = document.getElementById("inputContrasena");
-inputcontra.addEventListener("keyup",function(event) {
-  if (event.keyCode == 13) {
-    event.preventDefault();
-    login();
-  }
+inputcontra.addEventListener("keyup", function(event) {
+    if (event.keyCode == 13) {
+        event.preventDefault();
+        login();
+    }
 })
 
 //envia la instruccion de abrir la pantalla de configuracion
-function abrirConf(){
+function abrirConf() {
     ipcRenderer.send('abrirPantallaConf', "");
 }
 
-function abrirConfMarcador(){
-  ipcRenderer.send('abrirConfMarcador', "");
+function abrirConfMarcador() {
+    ipcRenderer.send('abrirConfMarcador', "");
 }
 
-
+ipcRenderer.on('errorconexion', (event, data) => {
+    alert("", "Ocurrió un error de conexión");
+})
 
 //cacha el resultado de si las credenciales del usuario son validas 
 ipcRenderer.on('validarUsuarioResult', (event, datos) => {
 
-  if(datos.valido){
-    /*
-    $(".alert").remove();
-    $("#textoInicio").after(
+    if (datos.valido) {
+        /*
+        $(".alert").remove();
+        $("#textoInicio").after(
 
-      '<div class="alert alert-primary" role="alert">'+
-      datos.mensaje +
-      '</div>'
+          '<div class="alert alert-primary" role="alert">'+
+          datos.mensaje +
+          '</div>'
 
-    );
-    */
-    let datos = {};
-    datos.usuarioid = $("#inputUsuario").val();
-    datos.pssw = $("#inputContrasena").val();
-    ipcRenderer.send('setUsuario', datos)
-   
+        );
+        */
+        let datos = {};
+        datos.usuarioid = $("#inputUsuario").val();
+        datos.pssw = $("#inputContrasena").val();
+        ipcRenderer.send('setUsuario', datos)
 
-  }else
-  {
 
-    $(".alert").remove();
-    $("#inputUsuario").before(
-      
-      '<div class="alert alert-danger" role="alert" style="background: transparent; border: none;">'+
-      datos.mensaje +
-      '</div>'
+    } else {
 
-    );
-    $(".loader").hide()
-    $("#btnLogin").show()
+        $(".alert").remove();
+        $("#inputUsuario").before(
 
-  }
+            '<div class="alert alert-danger" role="alert" style="background: transparent; border: none;">' +
+            datos.mensaje +
+            '</div>'
+
+        );
+        $(".loader").hide()
+        $("#btnLogin").show()
+
+    }
 
 })
-

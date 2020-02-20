@@ -2,7 +2,7 @@ const mysql = require('mysql');
 const { promisify } = require('util');
 const { databaseMarcador } = require('./keys');
 const { ipcMain } = require('electron');
-var conexion = "";
+var conexion = {};
 console.log("Conectado al Marcador de : " + databaseMarcador.host)
 ipcMain.on('conexion', async(event) => {
     conexion = event;

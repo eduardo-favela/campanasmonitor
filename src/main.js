@@ -6,6 +6,19 @@ if (setupEvents.handleSquirrelEvent()) {
 }
 const { app, Menu, ipcMain, BrowserWindow, BrowserView } = require('electron')
 
+const fs = require('fs');
+const Cryptr = require('cryptr');
+const cryptr = new Cryptr('bsw2019');
+
+try {
+    let archivo = fs.readFileSync('cnn2020.json');
+} catch (err) {
+    if (err.code === 'ENOENT') {
+        require('./enc/cambiarcnn');
+        console.log('file or directory does not exist');
+    }
+}
+
 
 // variables de sistema en la aplicacion, como: usuario logueado y datos de agente
 let usuario;
@@ -14,18 +27,15 @@ var datosAgente;
 let pantallaConfig;
 let login;
 let modulos;
+let conexiones = [];
+let urls = [];
 
 //oculta los errores de uncaughtException
 process.on("uncaughtException", (err) => {
     console.log(err);
 });
 
-require('./bk/ipc/login');
-require('./bk/ipc/modulos');
-require('./bk/ipc/usuario');
-require('./bk/ipc/inicio');
-
-app.on('ready', ventanaLogin)
+app.on('ready', leerConexiones)
 
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
@@ -35,7 +45,7 @@ app.on('window-all-closed', () => {
 
 app.on('activate', () => {
     if (login === null) {
-        ventanaLogin();
+        leerConexiones();
     }
 })
 
@@ -75,7 +85,7 @@ function abrirPantallaConfig() {
         },
         show: false
     })
-    pantallaConfig.loadFile('src/frnt/views/configuracion.html')
+    pantallaConfig.loadFile('src/frnt/views/conexiones.html')
     pantallaConfig.on('closed', () => { pantallaConfig = null })
     pantallaConfig.once('ready-to-show', () => { pantallaConfig.show() })
         /* pantallaConfig.webContents.openDevTools() */
@@ -96,7 +106,7 @@ function ventanaMain() {
             },
             show: false
         })
-        /* modulos.webContents.openDevTools() */
+        //modulos.webContents.openDevTools()
     modulos.loadFile('src/frnt/views/inicio.html')
     modulos.on('closed', () => { modulos = null })
     modulos.once('ready-to-show', () => {
@@ -126,9 +136,8 @@ ipcMain.on('guardarConfig', async(event, conf) => {
 });
 
 ipcMain.on('leerConfi', async(event, arg) => {
-    const editJsonFile = require("edit-json-file");
-    let file = editJsonFile(`${__dirname}/bk/cnn/conexion.json`);
-    event.reply('leerConfiResult', file.toObject())
+
+    event.reply('leerConfiResult', conexiones)
 
 });
 
@@ -169,3 +178,89 @@ ipcMain.on('setUsuario', async(event, dato) => {
 ipcMain.on('cerrarVentana', async(event, arg) => {
     login.close();
 });
+
+//Cierra la pantalla de configuración de conexiones
+ipcMain.on('cerrarVentana2', async(event, arg) => {
+    pantallaConfig.close();
+});
+
+ipcMain.on('geturls', async(event) => {
+    event.reply('geturlsresult', urls)
+});
+
+//////////////////////////////////////////////////////////////*Parte para seleccionar la conexión*//////////////////////////////////////////////////////////////
+ipcMain.on('seleccionarConexion', async(event, id) => {
+
+    conexiones.forEach(conexion => {
+
+        if (conexion.id == id) {
+            conexion.select = true;
+        } else {
+            conexion.select = false;
+        }
+
+    });
+    var conf = { conexiones }
+    const conexiones_ = cryptr.encrypt(JSON.stringify(conf));
+    let cnn = { conexiones: conexiones_ };
+    let data = JSON.stringify(cnn);
+    fs.writeFileSync('cnn2020.json', data);
+    event.reply("seleccionarConexionResult", "")
+
+});
+
+
+async function leerConexiones() {
+
+    try {
+
+        let cnn2020 = fs.readFileSync('cnn2020.json');
+        let conf = JSON.parse(cnn2020);
+        const decryptedString = cryptr.decrypt(conf.conexiones);
+        var configuraciones = JSON.parse(decryptedString);
+        conexiones = configuraciones.conexiones;
+
+        if (configuraciones.conexiones.length == 1) {
+            //Abrir login
+            urls = configuraciones.conexiones[0].urls;
+            console.log(configuraciones.conexiones);
+            requerirIpc()
+            ventanaLogin()
+        } else {
+            //abrir pantalla de conf
+            var selected = await conexiones.filter(conexion => conexion.select);
+            if (selected.length == 0) {
+                abrirPantallaConfig()
+            } else {
+                urls = selected[0].urls;
+                requerirIpc()
+                ventanaLogin()
+            }
+
+        }
+
+    } catch (err) {
+        if (err.code === 'ENOENT') {
+
+
+            const options = {
+                type: 'info',
+                buttons: ['Ok'],
+                title: 'Falta configuraciones',
+                message: 'No existen conexiones configuradas',
+            };
+            dialog.showMessageBoxSync(null, options);
+            app.quit()
+
+        }
+    }
+}
+
+
+
+function requerirIpc() {
+    require('./bk/ipc/login');
+    require('./bk/ipc/modulos');
+    require('./bk/ipc/usuario');
+    require('./bk/ipc/inicio');
+}

@@ -1,19 +1,38 @@
 const mysql = require('mysql');
 const { promisify } = require('util');
 const { database } = require('./keys');
+const { ipcMain } = require('electron');
 console.log("Conectado al crm de : " + database.host)
 const pool = mysql.createPool(database);
+var conexion = {};
+ipcMain.on('conexion', async(event) => {
+    conexion = event;
+});
 
 pool.getConnection((err, connection) => {
     if (err) {
+        conexion.reply('errorconexion', err);
+        console.log("Error: ", err.code);
+        if (err.code === 'ECONNRESET') {
+            conexion.reply('errorconexion', err);
+        }
+        if (err.code === 'EHOSTUNREACH') {
+            conexion.reply('errorconexion', err);
+        }
+        if (err.code === 'ETIMEDOUT') {
+            conexion.reply('errorconexion', err);
+        }
         if (err.code === 'PROTOCOL_CONNECTION_LOST') {
-            console.error('Database connection was closed.');
+            conexion.reply('errorconexion', err);
         }
         if (err.code === 'ER_CON_COUNT_ERROR') {
-            console.error('Database has to many connections');
+            conexion.reply('errorconexion', err);
         }
         if (err.code === 'ECONNREFUSED') {
-            console.error('Database connection was refused');
+            conexion.reply('errorconexion', err);
+        }
+        if (err.code === 'ECANCELED') {
+            conexion.reply('errorconexion', err);
         }
     }
 

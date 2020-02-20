@@ -1,10 +1,8 @@
 const querys = require('../querys/login');
 const pool = require('../cnn/database');
-const pool3 = require('../cnn/databasep');
-const https = require('https');
 module.exports.validarUsuario = async(datos, event) => {
     const retorno = {};
-    const usuario = await pool3.query(querys.validaUsuario, [datos.usuarioid.trim()]);
+    const usuario = await pool.query(querys.validaUsuario, [datos.usuarioid.trim()]);
     if (usuario.length > 0) {
 
         let nuevoUsurio = JSON.parse(JSON.stringify(usuario[0]));
@@ -17,7 +15,7 @@ module.exports.validarUsuario = async(datos, event) => {
 
         } else {
 
-            var url = "https://crm2.bsw.mx:8080/P8821/P821?psw=" + datos.pssw + "&llave=" + key + "&pswdb=" + nuevoUsurio.SSUSRPSW;
+            var url = datos.url + "?psw=" + datos.pssw + "&llave=" + key + "&pswdb=" + nuevoUsurio.SSUSRPSW;
             var request = require('request');
             request(url, await
                 function(error, response, body) {
@@ -58,7 +56,7 @@ module.exports.validarUsuario = async(datos, event) => {
 
 module.exports.consultarNombre = async(usuarioid) => {
 
-    const usuario = await pool3.query(querys.nombreUsuario, [usuarioid.trim()]);
+    const usuario = await pool.query(querys.nombreUsuario, [usuarioid.trim()]);
     return usuario;
 }
 

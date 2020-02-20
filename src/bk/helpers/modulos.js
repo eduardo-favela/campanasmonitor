@@ -1,10 +1,10 @@
 const querys = require('../querys/modulos');
-const pool3 = require('../cnn/databasep');
+const pool = require('../cnn/database');
 
 module.exports.getUsuario = async(usuarioid) => {
     var objUsuario = {};
-    const alUsuarios = await pool3.query(querys.getUsuarioValido, [usuarioid.trim()]);
-    const areas = await pool3.query(querys.getAreas, [usuarioid.trim()]);
+    const alUsuarios = await pool.query(querys.getUsuarioValido, [usuarioid.trim()]);
+    const areas = await pool.query(querys.getAreas, [usuarioid.trim()]);
     objUsuario.CNUSERID = alUsuarios[0].SSUSRID;
     objUsuario.CNUSERDSC = alUsuarios[0].SSUSRDSC;
     objUsuario.CNCDIRID = alUsuarios[0].CNCDIRID;
@@ -22,17 +22,17 @@ module.exports.getUsuario = async(usuarioid) => {
 }
 
 module.exports.getModulosArea = async(datos) => {
-    const modulosAres = await pool3.query(querys.getModulosAreas, [datos.RPFARESID, datos.RPFLINEA]);
+    const modulosAres = await pool.query(querys.getModulosAreas, [datos.RPFARESID, datos.RPFLINEA]);
     var modulosAreas = {};
     return modulosAreas.modulosAreas = modulosAres;
 }
 
 module.exports.getArbol = async(datos) => {
-    var configuracion = await pool3.query(querys.tieneConfiguracion, [datos.CNESMNID, datos.RPFLINEA]);
+    var configuracion = await pool.query(querys.tieneConfiguracion, [datos.CNESMNID, datos.RPFLINEA]);
     if (configuracion.length > 0) {
-        configuracion = await pool3.query(querys.getMenuArbolConf, [datos.CNESMNID, datos.RPFLINEA]);
+        configuracion = await pool.query(querys.getMenuArbolConf, [datos.CNESMNID, datos.RPFLINEA]);
     } else {
-        configuracion = await pool3.query(querys.getMenuArbol, [datos.CNESMNID]);
+        configuracion = await pool.query(querys.getMenuArbol, [datos.CNESMNID]);
     }
     return configuracion;
 }

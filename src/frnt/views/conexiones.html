@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <meta charset="UTF-8">
+      <title>Conexiones</title>
+      <link rel="stylesheet" href="../../../node_modules/bootstrap/dist/css/bootstrap.min.css">
+      <link rel="stylesheet" href="css/login.css">
+      <link rel="stylesheet" href="css/stylefonts.css">
+   </head>
+   <body class="text-center bg-secondary position-absolute h-100 col-12 p-0">
+     <div id="loginConf" class="col-12 h-100 loginBg">
+        <div class="col-10 mx-auto" >
+
+            <!-- <h1 class="text-white">Inicio sesión</h1>-->
+            <input type="password" id="inputContrasenaConf" class="col-12 my-3 p-2 inputsLogin" placeholder="Secret key">
+            <button type="button" onclick="login()" class="btn btnLogin col-12 my-3">Entrar</button>
+            <button type="button" onclick="cerrarVentana()" class="btn btn-link" style="color: #fff;">Cerrar</button>
+
+        </div>
+     </div>   
+     <div id="conf" style="display: none;" class="col-12 h-100 loginBg">
+         <h1 class="text-white col-12 float-left pt-5">Conexiones</h1>
+         <ul id="listConexiones"  class="list-group float-left col-12 text-left">
+         </ul>
+         <button type="button" onclick="cerrar()" class="btn btn-link  col-12 text-center" style="color: #fff;">Continuar</button>
+      </div>   
+
+   </body>
+   <script src="js/conexiones.js"></script>
+</html>

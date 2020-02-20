@@ -1,36 +1,42 @@
 const pool = require('../cnn/database');
-const pool3 = require('../cnn/databasep');
 const pool2 = require('../cnn/databaseMarcador.js');
-const pool4 = require('../cnn/databaseMarcadorp.js');
 const querys = require('../querys/inicio');
 const $ = require('jquery');
 
 //Informacion del agente
 module.exports.consultarAgentes = async(campana, ID, sts, stsres) => {
-    const supervisorOut = await pool3.query(querys.consultarAgentesOut, [campana, ID, sts, stsres, ]);
+    const supervisorOut = await pool.query(querys.consultarAgentesOut, [campana, ID, sts, stsres, ]);
     const agentes = {};
     agentes.out = supervisorOut;
     /* console.log(agentes); */
     return agentes;
 }
-module.exports.getAllCampanas = async(datos) => {
-    const allCampanasOut = await pool3.query(querys.getAllCampanasOut, []);
+module.exports.getAllCampanas = async(spv) => {
+    const allCampanasOut = await pool.query(querys.getAllCampanasOut, [spv]);
     var campanas = {};
     campanas = allCampanasOut;
     return campanas;
 }
 
-module.exports.getAllEstatus = async(datos) => {
-    const allEstatus = await pool.query(querys.getAllEstatus, []);
-    const estatusRes = await pool.query(querys.getEstatusRes, []);
-    const Estatus = {};
-    Estatus.agente = allEstatus,
-        Estatus.receso = estatusRes;
-    return Estatus
+module.exports.getuniverso = async(campanaid, canal) => {
+    const uni = await pool.query(querys.getuniverso, [campanaid, canal]);
+    return uni[0].universo;
 }
 
+module.exports.getcmpcallback = async() => {
+    let arraycmpcallback = [];
+    const cmpcallback = await pool.query(querys.getcmpcallback);
+    console.log("Campanas callback ", cmpcallback);
+    for (var i = 0; i < cmpcallback.length; i++) {
+        arraycmpcallback.push(cmpcallback[i].btcampanaid);
+    }
+    const respuesta = await pool.query(querys.updatecontcallback, arraycmpcallback);
+    console.log("Respuesta de update callbacks", respuesta);
+}
+
+
 module.exports.consultarSupervisores = async(usuarioid) => {
-    const allSupervisores = await pool3.query(querys.consultarSupervisores, [usuarioid]);
+    const allSupervisores = await pool.query(querys.consultarSupervisores, [usuarioid]);
     return allSupervisores;
 }
 
@@ -38,84 +44,101 @@ module.exports.getduracioncampana = async(idcampana, campo) => {
     console.log(idcampana, campo);
     let duracion = [];
     if (campo === "btfechahoraprimronda") {
-        duracion = await pool3.query(querys.getduracioncampanaprimronda, [idcampana]);
+        duracion = await pool.query(querys.getduracioncampanaprimronda, [idcampana]);
     } else if (campo === "btfechahorasegronda") {
-        duracion = await pool3.query(querys.getduracioncampanasegronda, [idcampana]);
+        duracion = await pool.query(querys.getduracioncampanasegronda, [idcampana]);
     } else if (campo === "btfechahoraterronda") {
-        duracion = await pool3.query(querys.getduracioncampanaterronda, [idcampana]);
+        duracion = await pool.query(querys.getduracioncampanaterronda, [idcampana]);
     }
-    console.log(duracion);
-    return duracion[0];
+    /* console.log(duracion); */
+    return duracion[0].duracion;
 }
 
-//cerrar sesion agente
-module.exports.cerrarSesionAgt = async(agnt, modulo) => {
-    if (modulo == "I") {
-        const cerrarSesionAgt = await pool.query(querys.cerrarSesionAgt, [agnt]);
-        return cerrarSesionAgt;
+module.exports.reLlamar = async(idcampana, canal) => {
+    console.log(canal);
+    if (canal === 'WCAL' || canal === 'CALL') {
+        await pool.query(querys.getrellamarcallbacks, [idcampana, idcampana]);
     } else {
-        const cerrarSesionAgt = await pool3.query(querys.cerrarSesionAgtOut, [agnt]);
-        return cerrarSesionAgt;
+        await pool.query(querys.getrellamar, [idcampana, idcampana]);
     }
-}
-
-module.exports.getAllSupervisores = async(datos) => {
-    const allSupervisor = await pool.query(querys.getSupervisor, [datos]);
-    var supervisores = {};
-    if (allSupervisor.length <= 0) {
-        const allSupervisores = await pool.query(querys.getAllSupervisores, []);
-        return supervisores.supervisores = allSupervisores;
-    } else {
-        return supervisores.supervisores = allSupervisor;
-    }
-
-}
-
-module.exports.reLlamar = async(idcampana) => {
-    const result = await pool3.query(querys.getrellamar, [idcampana, idcampana]);
-    console.log("Resultado de actualizar contactos por Re-Llamar", result);
-    return result;
 }
 
 
 //guardar las rondas 
-module.exports.lnzaRondaCampana = async(campana, arrancar_llamadas, numeroRonda, supervisor) => {
-    const retorno = {};
-    var url = "http://93.188.164.92//BastiaanSoftwareCenter_Espartacus/php/repositorios/MonitorOutbound.php?accion=guardarRondasCampana&campanaId=" + campana + "&arrancarLlamadas=" + arrancar_llamadas + "&NumeroRonda=" + numeroRonda + "&usuario=" + supervisor;
-    /* console.log(url) */
+module.exports.lnzaRondaCampana = async(event, campana, arrancar_llamadas, numeroRonda, supervisor) => {
+    let retorno = {};
+    var url = "http://" + pool2.host.toString() + "//BastiaanSoftwareCenter_Espartacus/php/repositorios/MonitorOutbound.php?accion=guardarRondasCampana&campanaId=" + campana + "&arrancarLlamadas=" + arrancar_llamadas + "&NumeroRonda=" + numeroRonda + "&usuario=" + supervisor;
     var request = require('request');
     request(url, await
         function(error, response, body) {
-
+            let result = {};
             if (error) {
                 retorno.valido = false;
                 retorno.mensaje = "Error de conexión con el servidor";
+                return retorno;
             } else {
                 retorno.valido = true;
                 retorno.mensaje = "Success";
+                if (response.complete && response.statusCode == 200) {
+                    result.result = true;
+                    if (arrancar_llamadas === "NO") {
+                        console.log("Ronda " + numeroRonda + " de la Campana " + campana + " detenida.");
+                        result.status = false;
+                    } else {
+                        console.log("Ronda " + numeroRonda + " de la Campana " + campana + " lanzada.");
+                        result.status = true;
+                    }
+                    const resp = JSON.parse(response.body);
+                    if (resp.valor) {
+                        setTimeout(function() {
+                            event.reply('lanzaRondaCampanaResult', result);
+                        }, 3000);
+                    }
+                }
+                console.log(response.body);
             }
-
         });
-    /* console.log(retorno); */
 }
 
+
 //consultar agentes 
-module.exports.consultarAgente = async(campana, arrancar_llamadas, numeroRonda) => {
-    const retorno = {};
-    var url = "http://93.188.164.92//BastiaanSoftwareCenter_Espartacus/php/repositorios/MonitorOutbound.php?accion=consultarAgentes&campanaId=" + campana + "&arrancarLlamadas=" + arrancar_llamadas + "&NumeroRonda=" + numeroRonda;
-    /* console.log(url) */
+module.exports.consultarAgente = async(event, campana, arrancar_llamadas, numeroRonda) => {
+    let retorno = {};
+    var url = "http://" + pool2.host.toString() + "//BastiaanSoftwareCenter_Espartacus/php/repositorios/MonitorOutbound.php?accion=consultarAgentes&campanaId=" + campana + "&arrancarLlamadas=" + arrancar_llamadas + "&NumeroRonda=" + numeroRonda;
     var request = require('request');
     request(url, await
         function(error, response, body) {
-
+            let resultado = false;
             if (error) {
                 retorno.valido = false;
                 retorno.mensaje = "Error de conexión con el servidor";
+                resultado = false;
             } else {
                 retorno.valido = true;
                 retorno.mensaje = "Success";
+                if (response.complete && response.statusCode == 200) {
+                    console.log("Ronda " + numeroRonda + " " + arrancar_llamadas + " completada: ", response.complete, "Estatus de la peticion: ", response.statusCode);
+                    resultado = true;
+                } else {
+                    console.log("Ronda no completada", response.complete, "  ", response.statusCode);
+                    resultado = false;
+                }
+                console.log(response.body);
             }
-
         });
-    /* console.log(retorno); */
+}
+
+
+module.exports.getstatuscmp = async(campana) => {
+    let result = {};
+    const nocontactos = await pool.query(querys.getnocontactoscmp, [campana, campana]);
+    const nocontactosasign = await pool.query(querys.getnocontactosasign, [campana, campana]);
+    console.log("Numero de contactos de campana asignados a llamada: " + nocontactos[0].nocontactos + " Total de contactos de campana: " + nocontactosasign[0].nocontactos);
+    result.cmp = campana;
+    if (parseInt(nocontactos[0].nocontactos) == parseInt(nocontactosasign[0].nocontactos)) {
+        result.statuscmp = true;
+    } else {
+        result.statuscmp = false;
+    }
+    return result.statuscmp;
 }
